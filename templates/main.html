@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">主页</li>
+        </ol>
+    </nav>
+    <div class="card-columns">
+        <div class="card video-list" id="blog">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+                         src="{{ url_for('static', filename='images/blog.jpg') }}">
+            <div class="card-body">
+                <span>个人博客</span>
+            </div>
+        </div>
+        <div class="card video-list" id="chat">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+            src="{{ url_for('static', filename='images/blog.jpg') }}">
+            <div class="card-body">
+                <span>在线聊天室</span>
+            </div>
+        </div>
+        <div class="card video-list" id="lottery">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+             src="{{ url_for('static', filename='images/blog.jpg') }}">
+            <div class="card-body">
+                <span>抽奖</span>
+            </div>
+        </div>
+        
+    </div>
+    <div class="card-columns">
+        <div class="card video-list" id="stream">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+             src="{{ url_for('static', filename='images/blog.jpg') }}">
+            <div class="card-body">
+                <span>站长直播</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block foot %}
+<script>
+    $(document).ready(function () {
+        $("#blog").click(function () {
+            location.href = "https://decade.net.cn/";
+        });
+        $("#chat").click(function () {
+            location.href = "/index/";
+        });
+        $("#lottery").click(function () {
+            location.href = "/lottery/";
+        });
+        $("#stream").click(function () {
+            location.href = "/stream/";
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--指定网页支持响应式：电脑和手机自适应-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ data['title'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bw/dist/sketchy/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-primary justify-content-between">
+    <div class="container">
+        <a class="navbar-brand" id="site_name" href="/">2027406022.com</a>
+        <form class="form-inline">
+            {% if session.get("name") %}
+            <a href="/userprofile/" class="text-warning">{{ session.get("name") }}</a>
+            &nbsp;
+            <a href="/logout/" class="text-danger">退出</a>
+            {% else %}
+            <a href="/login/" class="btn btn-success my-2 my-sm-0">登录</a>
+            &nbsp;
+            <a href="/regist/" class="btn btn-danger my-2 my-sm-0">注册</a>
+            {% endif %}
+        </form>
+    </div>
+</nav>
+
+<div class="container" id="main">
+    <div class="row">
+        {% block content %}{% endblock %}
+        <div class="col-md-2 pad-left">
+            <div class="input-group mb-3">
+                <input type="text" id="input_q" class="form-control" placeholder="请输入搜索内容！"
+                       aria-label="Recipient's username" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" id="btn-search">搜索</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    快捷导航
+                </div>
+                <div class="card-body">
+                    <button type="button" class="btn btn-info"
+                    onclick="window.location.href='/build/'"
+                    >直播创建</button>
+                    <br><br>
+                    <button type="button" class="btn btn-info"
+                    onclick="window.location.href='/myStream/'"
+                    >我的直播信息</button> 
+                    <br><br>
+                    <button type="button" class="btn btn-info"
+                    onclick="window.location.href='#'"
+                    >课程列表</button> 
+                    <br><br>
+                    <button type="button" class="btn btn-info"
+                    onclick="window.location.href='#'"
+                    >帮助</button> 
+                    <br><br>
+                    <button type="button" class="btn btn-info"
+                    onclick="window.location.href='#'"
+                    >举报</button> 
+                    <br><br>
+                    <button type="button" class="btn btn-info"
+                    onclick="window.location.href='#'"
+                    >客服</button> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="jumbotron foot-section">
+    <hr class="my-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+            </div>
+            <div class="col-md-4">
+                <h5>Decade</h5>
+                <!-- <p class="info-text">— 人生苦短，我用Python！</p>
+                <p class="info-text">微信：13700632835</p>
+                <p class="info-text">手机：13700632835</p>
+                <p class="info-text">邮箱：3237550600@qq.com</p>
+                <p class="info-text">编程爱好者，多年丰富的项目经验，擅长python、php、golang、centos、reactnative等技术。</p> -->
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-4">
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="my-4">
+    <div class="container">
+        <ul class="list-inline text-center">
+            <li class="info-text"><a href="http://www.miibeian.gov.cn/" target="_blank">苏ICP备17011280号</a>
+            </li>
+            <li class="info-text">© 2018-2019 Decade</li>
+        </ul>
+    </div>
+</div>
+<script src="https://cdn.bootcss.com/lazysizes/4.0.2/lazysizes.min.js"></script>
+<script src="https://cdn.bootcss.com/holder/2.9.4/holder.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+{% block foot %}{% endblock %}
+<script>
+    $(document).ready(function () {
+        $("#btn-search").click(function () {
+            var q = $("#input_q").val();
+            location.href = "/?q=" + q
+        });
+    });
+</script>
+</body>
+</html>

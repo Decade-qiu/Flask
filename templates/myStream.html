@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <div class="card">
+        <div class="card-header">
+            我的直播信息
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                {% raw xsrf_form_html() %}
+                {% set v = data['stream'] %}
+                {% if v['data'] %}
+                {% for val in v['data'] %}
+                <li class="list-group-item">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ val.title }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ val.url }}
+                            </div>
+                            <div class="col-md-2">
+                                <a class="btn btn-success stream" urlId="{{ val.url }}">进入</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% end %}
+                {% end %}
+            </ul>
+            <br>
+            <div class="form-group">
+                <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">创建直播</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% end %}
+
+{% block foot %}
+<script src="{{ static_url('js/request.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        // var obj = document.getElementById('url').innerText;
+        // console.log(obj);
+        $(".stream").click(function(){
+            var locurl = $(this).attr('urlId');
+            $.ajax({
+                url: "/stream/",
+                data: {url : locurl},
+                dataType: "json",
+                type: "POST",
+                success: function (res) {
+                    location.href = "/stream/?"+"app="+res['app']+"&"+"name="+res['name']
+                },
+                error: function (res) {
+                    console.log(res);
+                }
+            });
+        });
+    });
+</script>
+{% end %}

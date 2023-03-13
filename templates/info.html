@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <div class="card">
+        <div class="card-header">
+            抽奖信息配置
+        </div>
+        <div class="card-body">
+            <form id="form-data">
+                <div class="form-group">
+                    <label>一等奖人数 : {{ data['num1'] }}</label>
+                </div>
+                <div class="form-group">
+                    <label>二等奖人数 : {{ data['num2'] }}</label>
+                </div>
+                <div class="form-group">
+                    <label>三等奖人数 : {{ data['num3'] }}</label>
+                </div>
+                <div class="form-group">
+                    <label>总获奖人数 : {{ data['win_len'] }}
+                        &nbsp;
+                        总人数 : {{ data['people_len'] }}</label>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            抽奖结果
+        </div>
+        <div class="card-body">
+            <form id="form-data" enctype="multipart/form-data" method="post">
+                <div class="form-group">
+                    <label>一等奖</label>
+                    <div id = "p1" style='font-size:20px; color:red'>
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>二等奖</label>
+                    <div id = "p2" style='font-size:20px; color:blue'>
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>三等奖</label>
+                    <div id = "p3" style='font-size:20px; color:green'>
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-primary"
+                    onclick="start1()" style="color: aliceblue;">一等奖抽奖</a>
+                    &nbsp;
+                    <a class="btn btn-primary"
+                    onclick="stop1()" style="color: aliceblue;">停止抽奖</a>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-primary"
+                    onclick="start2()" style="color: aliceblue;">二等奖抽奖</a>
+                    &nbsp;
+                    <a class="btn btn-primary"
+                    onclick="stop2()" style="color: aliceblue;">停止抽奖</a>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-primary"
+                    onclick="start3()" style="color: aliceblue;">三等奖抽奖</a>
+                    &nbsp;
+                    <a class="btn btn-primary"
+                    onclick="stop3()" style="color: aliceblue;">停止抽奖</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% end %}
+
+{% block foot %}
+<script>
+    var nam1="{{data['people1']}}".split(",");//参与者名单
+    var nam2="{{data['people2']}}".split(",");//参与者名单
+    var nam3="{{data['people3']}}".split(",");//参与者名单
+    var nameArray="{{data['people_in']}}".split(",");//参与者名单
+    var whoGetTheMysteryAward=[];
+    var w1='', w2='', w3='';
+    var timer1, timer2, timer3, flag;
+    function start1(){
+        timer1 = setInterval(function(){
+            document.getElementById('p1').innerText= getNameForAward(nam1.length);
+        },50);
+    }
+    function stop1(){
+        clearInterval(timer1);
+        document.getElementById('p1').innerText=ff(nam1);
+        return null;
+    }
+    function start2(){
+        timer2 = setInterval(function(){
+            document.getElementById('p2').innerText= getNameForAward(nam2.length);
+        },50);
+    }
+    function stop2(){
+        clearInterval(timer2);
+        document.getElementById('p2').innerText=ff(nam2);
+        return null;
+    }
+    function start3(){
+        timer3 = setInterval(function(){
+            document.getElementById('p3').innerText= getNameForAward(nam3.length);
+        },50);
+    }
+    function stop3(){
+        clearInterval(timer3);
+        document.getElementById('p3').innerText=ff(nam3);
+        return null;
+    }
+    function creatNameForAward(){
+        flag=1;
+        
+        timer2 = setInterval(function(){
+            document.getElementById('p2').innerText= getNameForAward(nam2.length);
+        },50);
+        timer3 = setInterval(function(){
+            document.getElementById('p3').innerText= getNameForAward(nam3.length);
+        },50);
+    }
+
+    //停止滚动方法
+    function stop(){
+
+        clearInterval(timer1);
+        clearInterval(timer2);
+        clearInterval(timer3);
+        document.getElementById('p1').innerText=ff(nam1);
+        document.getElementById('p2').innerText=ff(nam2);
+        document.getElementById('p3').innerText=ff(nam3);
+        flag++;
+        return null;
+    }
+
+    function getNameForAward(x){
+        var ans = "";
+        for (var i = 0;i < x;i++){
+            var num = Math.floor(Math.random()*(nameArray.length-1));
+            ans += nameArray[num]+"  ";
+        }
+        return ans;
+    }
+
+    function ff(x){
+        var ans = "";
+        for (var i = 0;i < x.length;i++){
+            ans += x[num]+"  ";
+        }
+        return ans;
+    }
+
+</script>
+{% end %}

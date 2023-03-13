@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <div class="card">
+        <div class="card-header">
+            个人资料
+        </div>
+        <div class="card-body">
+            {% set u = data['user'] %}
+            <form id="form-data">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>昵称</label>
+                            <input name="id" type="hidden" value="{{ u.id }}">
+                            <input class="form-control"
+                                   name="name"
+                                   placeholder="请输入昵称！"
+                                   type="text"
+                                   value="{{ u.name }}">
+                            <p class="text-danger" id="error_name"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>邮箱</label>
+                            <input class="form-control"
+                                   name="email"
+                                   placeholder="请输入邮箱！"
+                                   type="email"
+                                   value="{{ u.email }}">
+                            <p class="text-danger" id="error_email"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>手机号码</label>
+                    <input class="form-control"
+                           name="phone"
+                           placeholder="请输入手机号码！"
+                           type="text"
+                           value="{{ u.phone }}">
+                    <p class="text-danger" id="error_phone"></p>
+                </div>
+                <div class="form-group">
+                    <label>性别</label>
+                    <br>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio"
+                               id="input_sex1"
+                               name="sex"
+                               value="1"
+                               class="custom-control-input" {% if u.sex== 1 %} checked{% endif %}>
+                        <label class="custom-control-label" for="input_sex1">男</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio"
+                               id="input_sex2"
+                               name="sex"
+                               value="2"
+                               class="custom-control-input" {% if u.sex== 2 %} checked{% endif %}>
+                        <label class="custom-control-label" for="input_sex2">女</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio"
+                               id="input_sex3"
+                               name="sex"
+                               value="3"
+                               class="custom-control-input" {% if u.sex== 3 %} checked{% endif %}>
+                        <label class="custom-control-label" for="input_sex3">保密</label>
+                    </div>
+                    <p class="text-danger" id="error_sex"></p>
+                </div>
+                <div class="form-group">
+                    <label>身份</label>
+                    <br>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio"
+                               id="input_role1"
+                               name="role"
+                               value="1"
+                               class="custom-control-input" {% if u.role== 1 %} checked{% endif %}>
+                        <label class="custom-control-label" for="input_role1">学生</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio"
+                               id="input_role2"
+                               name="role"
+                               value="2"
+                               class="custom-control-input" {% if u.role== 2 %} checked{% endif %}>
+                        <label class="custom-control-label" for="input_role2">教师</label>
+                    </div>
+                    <p class="text-danger" id="error_sex"></p>
+                </div>
+                <!--表单字段的容器标签-->
+                <div class="form-group">
+                    <!--标签名称-->
+                    <label>星座</label>
+                    <div class="row">
+                        <!--每一行原本12等分，现在我们分成6等分，每一分占2个栅格-->
+                        {% set xz = data['xz'] %}
+                        {% for v in xz %}
+                        <div class="col-md-2 text-left">
+                            <img class="lazyload blur-up img-fluid xingzuo-img border border-info rounded"
+                                 src="/static/xingzuo/{{ v['image'] }}">
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio"
+                                       id="input_xingzuo{{ v['val'] }}"
+                                       class="custom-control-input"
+                                       value="{{ v['val'] }}"
+                                       name="xingzuo" {% if u.xingzuo== v['val'] %} checked{% endif %}>
+                                <label class="custom-control-label" for="input_xingzuo{{ v['val'] }}">{{ v['name']
+                                    }}</label>
+                            </div>
+                            <p class="xingzuo-date text-left">{{ v['birth'] }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <p class="text-danger" id="error_xingzuo"></p>
+                </div>
+                <div class="form-group">
+                    <label>个性签名</label>
+                    <textarea class="form-control"
+                              placeholder="请输入个性签名！"
+                              rows="5"
+                              name="info"
+                    >{% if u.info %}{{ u.info }}{% endif %}</textarea>
+                    <p class="text-danger" id="error_info"></p>
+                </div>
+                <div class="form-group">
+                    <label for="input_face">头像</label>
+                    <input type="file" class="form-control-file" id="file_face">
+                    <input type="hidden" name="face" id="input_face" value="{% if u.face %}{{ u.face }}{% endif %}">
+                    <hr class="hr-dv">
+                    <div id="image_face">
+                        {% if u.face %}
+                        <img src="/static/uploads/{{ u.face }}" style="width: 200px;height: 200px">
+                        {% else %}
+                        <img data-src="holder.js/200x200">
+                        {% endif %}
+                    </div>
+                    <hr class="hr-dv">
+                    <a class="btn btn-info" id="upload_face" href="javascript:void(0)">上传头像</a>
+                    <p class="text-danger" id="error_face"></p>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">保存信息</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block foot %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+<script src="{{ url_for('static', filename='js/request.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        upload('face', 200, 200, '/upload/');
+        request('/userprofile/', '/logout/', ['name', 'email', 'phone', 'sex', 'xingzuo', 'info', 'face', 'role'], '修改成功！');
+    });
+</script>
+{% endblock %}

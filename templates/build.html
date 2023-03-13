@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <div class="card">
+        <div class="card-header">
+            直播间创建
+        </div>
+        <div class="card-body">
+            <form id="form-data">
+                <div class="form-group">
+                    <label>标题</label>
+                    {% raw xsrf_form_html() %}
+                    <input name="userid" type="hidden" value="{{ data['name'] }}">
+                    <input class="form-control"
+                           name="title"
+                           placeholder="请输入直播标题！"
+                           type="text">
+                    <p class="text-danger" id="error_title"></p>
+                </div>
+                <div class="form-group">
+                    <label>推流地址(支持rtmp和rtsp)</label>
+                    <input class="form-control"
+                           name="url"
+                           placeholder="请输入直播推流地址！"
+                           type="text">
+                    <p class="text-danger" id="error_url"></p>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">发布直播</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% end %}
+
+{% block foot %}
+<script src="{{ static_url('js/request.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        request('/build/', '/myStream/', ['title', 'url', 'userid'], '创建成功！');
+    });
+</script>
+{% end %}

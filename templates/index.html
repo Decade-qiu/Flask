@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">视频列表</li>
+        </ol>
+    </nav>
+    {% set v = data['video'] %}
+    <div class="card-columns">
+        {% if v['data'] %}
+        {% for val in v['data'] %}
+        <div class="card video-list" data-content-id="{{ val.id }}">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+                 src="/static/video/{{ val.logo }}">
+            <div class="card-body">
+                <span>{{ val.name }}</span>
+            </div>
+        </div>
+        {% end %}
+        {% end %}
+    </div>
+    {% module page(v,data['q']) %}
+</div>
+{% end %}
+
+{% block foot %}
+<script>
+    $(document).ready(function () {
+        $(".video-list").click(function () {
+            var id = $(this).attr("data-content-id");
+            location.href = "/playchat/?id=" + id;
+        });
+    });
+</script>
+{% end %}

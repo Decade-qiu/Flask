@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <div class="card">
+        <div class="card-header">
+            抽奖信息配置
+        </div>
+        <div class="card-body">
+            <form id="form-data" action="/info/" enctype="multipart/form-data" method="post">
+                <div class="form-group">
+                    <label>一等奖</label>
+                    <input name = "num1" type="text" class="form-control" placeholder="请输入一等奖人数！">
+                </div>
+                <div class="form-group">
+                    <label>二等奖</label>
+                    <input name = "num2" type="text" class="form-control" placeholder="请输入二等奖人数！">
+                </div>
+                <div class="form-group">
+                    <label>三等奖</label>
+                    <input name = "num3" type="text" class="form-control" placeholder="请输入三等奖人数！">
+                </div>
+                <div class="form-group">
+                    <label>人员名单</label>
+                    <input name = "people" type="file" class="form-control-file"  placeholder="请上传人员名单！">
+                </div>
+                <div class="form-group">
+                    <input class="btn btn-primary" type="submit" value="保存信息" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% end %}
+

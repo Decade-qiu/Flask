@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <div class="card">
+        <div class="card-header">会员登录</div>
+        <div class="card-body">
+            <form id="form-data">
+                <div class="form-group">
+                    <label>账号</label>
+                    <input class="form-control form-width"
+                           name="name"
+                           placeholder="请输入账号！"
+                           type="text">
+                    <p class="text-danger" id="error_name"></p>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input class="form-control form-width"
+                           name="pwd"
+                           placeholder="请输入密码！"
+                           type="password">
+                    <p class="text-danger" id="error_pwd"></p>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">登录</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block foot %}
+<script src="{{ url_for('static', filename='js/request.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        request("/login/", '/userprofile/', ['name', 'pwd'], "登录成功！");
+    });
+
+</script>
+{% endblock %}
