@@ -5,7 +5,7 @@
 * fields，验证的字段
 * msg，成功信息
 * */
-function request(url, rurl, fields, msg, csrf_token) {
+function request(url, rurl, fields, msg) {
     $("#btn-sub").click(function () {
         //获取表单数据
         var data = $("#form-data").serialize();

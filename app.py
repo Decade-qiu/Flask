@@ -1,14 +1,23 @@
-from flask import Flask, session, g
-import config
+from blueprints.chatroom import ChatRoomHandler
+import tornado.ioloop
+import tornado.web
+from tornado.web import Application, FallbackHandler
+from tornado.wsgi import WSGIContainer
+import sockjs.tornado
 
+from flask import Flask, session, g, request, redirect, render_template
+import config
+from blueprints.build import bp as build
 from blueprints.login import bp as login
 from blueprints.logout import bp as logout
+from blueprints.msg import bp as msg
+from blueprints.myStream import bp as myStream
+from blueprints.playchat import bp as playchat
 from blueprints.regist import bp as regist
 from blueprints.main import bp as main
+from blueprints.stream import bp as stream
 from blueprints.upload import bp as upload
 from blueprints.userprofile import bp as userprofile
-
-from exts import db, mail
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 
@@ -18,42 +27,42 @@ app = Flask(__name__)
 # CSRFProtect(app)
 # 绑定配置文件
 app.config.from_object(config)
-
-db.init_app(app)
-mail.init_app(app)
-migrate = Migrate(app, db)
+app.debug=True
 
 # 视图绑定
-# app.register_blueprint(qa_bp)
-# app.register_blueprint(auth_bp)
 app.register_blueprint(main)
 app.register_blueprint(regist)
 app.register_blueprint(login)
 app.register_blueprint(userprofile)
 app.register_blueprint(logout)
 app.register_blueprint(upload)
-
-# flask db init：只需要执行一次
-# flask db migrate：将orm模型生成迁移脚本
-# flask db upgrade：将迁移脚本映射到数据库中
+app.register_blueprint(playchat)
+app.register_blueprint(build)
+app.register_blueprint(myStream)
+app.register_blueprint(stream)
+app.register_blueprint(msg)
 
 # before_request/ before_first_request/ after_request
-# hook
 # @app.before_request
-# def my_before_request():
-#     user_id = session.get("user_id")
-#     if user_id:
-#         user = User.query.get(user_id)
-#         setattr(g, "user", user)
-#     else:
-#         setattr(g, "user", None)
+# def is_login():
+#     if request.path == "/login/":
+#         return None
+#     if not session.get("name", ''):
+#         return render_template('/login/')
 
-#
+# html global var
 # @app.context_processor
 # def my_context_processor():
 #     return {"user": g.user}
 
-
 if __name__ == '__main__':
-    app.debug=True
-    app.run()
+    # app.run()
+    ChatRouter = sockjs.tornado.SockJSRouter(ChatRoomHandler, '/chatroom')
+    wsgi_app = WSGIContainer(app)
+    application = tornado.web.Application(
+        ChatRouter.urls + [(r'.*', FallbackHandler, dict(fallback=wsgi_app))]
+    )
+    application.listen(8000)
+    tornado.ioloop.IOLoop.instance().start()
+
+

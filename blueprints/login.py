@@ -1,6 +1,5 @@
 
 from flask import Blueprint, render_template, jsonify, redirect, url_for, session
-from exts import mail, db
 from flask_mail import Message
 from flask import request
 import string
@@ -24,6 +23,7 @@ def login():
         form = LoginForm(request.form)
         if form.validate():
             session['name'] = form.data['name']
+            session['face'] = CRUD.user(form.data['name']).face
             res["code"] = 1
         else:
             res = form.errors

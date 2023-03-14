@@ -4,6 +4,7 @@ $(document).ready(function () {
     var conn = null;
     var name = $("#input_name").val();
     var face = $("#input_face").val();
+    var id = $("#input_id").val();
 
     /*
     发送消息的函数
@@ -83,6 +84,7 @@ $(document).ready(function () {
             $.ajax({
                 url: "/msg/",
                 type: "POST",
+                data:{streamid : id},
                 dataType: "json",
                 success: function (res) {
                     var msg_arr = res.data;
@@ -106,17 +108,6 @@ $(document).ready(function () {
             console.log("断开连接！");
             conn = null;
         };
-        /*发送数据*/
-        /*
-        setInterval(
-            function () {
-                var content = {
-                    "content": "好好学习，天天向上！"
-                };
-                conn.send(JSON.stringify(content));
-            },
-            2000
-        )*///每隔2秒发送一次
     }
 
     //断开
@@ -146,11 +137,11 @@ $(document).ready(function () {
 
     //点击发送按钮触发发送消息事件！
     $("#send_msg").click(function () {
-        //console.log(getFormData());
         var msg = getFormData();
         if (msg.content) {
             msg.code = 2;
             ue.setContent('');
+            console.log(msg);
             conn.send(JSON.stringify(msg)); //发送
         } else {
             alert("发送消息不能为空！");

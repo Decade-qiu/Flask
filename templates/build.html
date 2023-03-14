@@ -10,7 +10,6 @@
             <form id="form-data">
                 <div class="form-group">
                     <label>标题</label>
-                    {% raw xsrf_form_html() %}
                     <input name="userid" type="hidden" value="{{ data['name'] }}">
                     <input class="form-control"
                            name="title"
@@ -33,13 +32,13 @@
         </div>
     </div>
 </div>
-{% end %}
+{% endblock %}
 
 {% block foot %}
-<script src="{{ static_url('js/request.js') }}"></script>
+<script src="{{ url_for('static', filename='js/request.js') }}"></script>
 <script>
     $(document).ready(function () {
         request('/build/', '/myStream/', ['title', 'url', 'userid'], '创建成功！');
     });
 </script>
-{% end %}
+{% endblock %}

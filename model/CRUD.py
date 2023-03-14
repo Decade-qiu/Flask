@@ -3,7 +3,8 @@ import datetime  # 导入日期时间模块
 from model.models import User, Video, Msg, Stream
 from tools.orm import ORM
 from werkzeug.security import generate_password_hash  # 生成哈希密码
-
+import math
+from flask import request
 
 # 定义生成日期时间的函数
 def dt():
@@ -16,11 +17,11 @@ class CRUD:
     @staticmethod
     def user_unique(data, method=1):
         # 创建会话
-        session = ORM.db()
+        connect = ORM.db()
         user = None
         # 事务处理的逻辑
         try:
-            model = session.query(User)
+            model = connect.query(User)
             if method == 1:
                 # 昵称
                 user = model.filter_by(name=data).first()
@@ -31,11 +32,11 @@ class CRUD:
                 # 手机
                 user = model.filter_by(phone=data).first()
         except Exception as e:
-            session.rollback()  # 如果发生异常直接回滚
+            connect.rollback()  # 如果发生异常直接回滚
         else:
-            session.commit()  # 没有发生异常直接提交
+            connect.commit()  # 没有发生异常直接提交
         finally:
-            session.close()  # 无论是否发生异常最后一定关闭会话
+            connect.close()  # 无论是否发生异常最后一定关闭会话
         if user:
             return True
         else:
@@ -45,7 +46,7 @@ class CRUD:
     # 保存注册用户
     def save_regist_user(form):
         # 创建会话
-        session = ORM.db()
+        connect = ORM.db()
         try:
             user = User(
                 name=form.data['name'],
@@ -60,40 +61,40 @@ class CRUD:
                 updatedAt=dt()
             )
             # 添加记录
-            session.add(user)
+            connect.add(user)
         except Exception as e:
-            session.rollback()
+            connect.rollback()
             return False
         else:
-            session.commit()
+            connect.commit()
             return True
         finally:
-            session.close()
+            connect.close()
 
     # 登录验证
     @staticmethod
     def check_login(name, pwd):
-        session = ORM.db()
+        connect = ORM.db()
         result = False
         try:
-            user = session.query(User).filter_by(name=name).first()
+            user = connect.query(User).filter_by(name=name).first()
             if user:
                 if user.check_pwd(pwd):
                     result = True
         except Exception as e:
-            session.rollback()
+            connect.rollback()
         else:
-            session.commit()
+            connect.commit()
         finally:
-            session.close()
+            connect.close()
         return result
 
     # 保存用户信息
     @staticmethod
     def save_user(form):
-        session = ORM.db()
+        connect = ORM.db()
         try:
-            user = session.query(User).filter_by(id=int(form.data['id'])).first()
+            user = connect.query(User).filter_by(id=int(form.data['id'])).first()
             user.name = form.data['name']
             user.email = form.data['email']
             user.phone = form.data['phone']
@@ -103,85 +104,87 @@ class CRUD:
             user.info = form.data['info']
             user.updatedAt = dt()
             user.role = form.data['role']
-            session.add(user)
+            connect.add(user)
             print(form.data['role'])
             print(user.role)
             print("!!!!!!!!!")
         except Exception as e:
-            session.rollback()
+            connect.rollback()
         else:
-            session.commit()
+            connect.commit()
         finally:
-            session.close()
+            connect.close()
         return True
 
     # 获取用户
     @staticmethod
     def user(name):
-        session = ORM.db()
+        connect = ORM.db()
         user = None
         try:
-            user = session.query(User).filter_by(name=name).first()
+            user = connect.query(User).filter_by(name=name).first()
         except Exception as e:
-            session.rollback()
+            connect.rollback()
         else:
-            session.commit()
+            connect.commit()
         finally:
-            session.close()
+            connect.close()
         return user
 
     # 获取视频
     @staticmethod
     def video(id):
-        session = ORM.db()
+        connect = ORM.db()
         video = None
         try:
-            video = session.query(Video).filter_by(id=int(id)).first()
+            video = connect.query(Video).filter_by(id=int(id)).first()
         except Exception as e:
-            session.rollback()
+            connect.rollback()
         else:
-            session.commit()
+            connect.commit()
         finally:
-            session.close()
+            connect.close()
         return video
 
     # 保存消息
     @staticmethod
-    def save_msg(content):
-        session = ORM.db()
+    def save_msg(content, streamid):
+        connect = ORM.db()
         try:
             msg = Msg(
                 content=content,
                 createdAt=dt(),
-                updatedAt=dt()
+                updatedAt=dt(),
+                streamId=streamid
             )
-            session.add(msg)
+            connect.add(msg)
         except Exception as e:
-            session.rollback()
+            print(e)
+            connect.rollback()
         else:
-            session.commit()
+            connect.commit()
         finally:
-            session.close()
+            connect.close()
 
     # 查询消息
     @staticmethod
-    def new_msg():
-        session = ORM.db()
+    def new_msg(sid):
+        connect = ORM.db()
         data = None
         try:
-            data = session.query(Msg).order_by(Msg.createdAt.asc()).limit(200).all()
+            data = connect.query(Msg).filter_by(streamId=sid).order_by(Msg.createdAt.asc()).limit(200).all()
         except Exception as e:
-            session.rollback()
+            connect.rollback()
         else:
-            session.commit()
+            connect.commit()
         finally:
-            session.close()
+            connect.close()
         return data
 
     # 保存直播信息
     @staticmethod
     def save_stream(form):
-        session = ORM.db()
+        connect = ORM.db()
         try:
             stream = Stream(
                 title=form.data['title'],
@@ -189,13 +192,71 @@ class CRUD:
                 createdAt=dt(),
                 userid=form.data['userid']
             )
-            session.add(stream)
+            connect.add(stream)
         except Exception as e:
-            session.rollback()
+            connect.rollback()
             return False
         else:
-            session.commit()
+            connect.commit()
             return True
         finally:
-            session.close()
+            connect.close()
 
+    # 显示直播信息
+    @staticmethod
+    def show_stream(name):
+        connect = ORM.db()
+        model = None
+        try:
+            model = connect.query(Stream).filter_by(userid=name).order_by(Stream.createdAt.desc())
+        except Exception as e:
+            connect.rollback()
+            print(e)
+        else:
+            connect.commit()
+        finally:
+            connect.close()
+        return CRUD.page(model)
+
+    @staticmethod
+    def page(model):
+        # 获取页码
+        page = request.args.get("page", 1)
+        page = int(page)
+        # 统计数据表中有多少条记录
+        total = model.count()
+        if total:
+            # 每页显示多少条
+            shownum = 6
+            # 确定总共显示多少页
+            pagenum = int(math.ceil(total / shownum))
+            # 判断小于第一页
+            if page < 1:
+                page = 1
+            # 判断大于最后一页
+            if page > pagenum:
+                page = pagenum
+
+            # sql限制查询，每次查询限制多少条，偏移量是多少
+            offset = (page - 1) * shownum
+            # 分页查询
+            data = model.limit(shownum).offset(offset)
+            # 上一页
+            prev_page = page - 1
+            next_page = page + 1
+            if prev_page < 1:
+                prev_page = 1
+            if next_page > pagenum:
+                next_page = pagenum
+            arr = dict(
+                pagenum=pagenum,
+                page=page,
+                prev_page=prev_page,
+                next_page=next_page,
+                data=data
+            )
+        else:
+            arr = dict(
+                data=[]
+            )
+        return arr
