@@ -7,6 +7,7 @@ import sockjs.tornado
 
 from flask import Flask, session, g, request, redirect, render_template
 import config
+from blueprints.course import bp as course
 from blueprints.build import bp as build
 from blueprints.login import bp as login
 from blueprints.logout import bp as logout
@@ -18,6 +19,7 @@ from blueprints.main import bp as main
 from blueprints.stream import bp as stream
 from blueprints.upload import bp as upload
 from blueprints.userprofile import bp as userprofile
+from blueprints.index import bp as index
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 
@@ -30,25 +32,23 @@ app.config.from_object(config)
 app.debug=True
 
 # 视图绑定
-app.register_blueprint(main)
-app.register_blueprint(regist)
-app.register_blueprint(login)
-app.register_blueprint(userprofile)
-app.register_blueprint(logout)
-app.register_blueprint(upload)
-app.register_blueprint(playchat)
-app.register_blueprint(build)
-app.register_blueprint(myStream)
-app.register_blueprint(stream)
-app.register_blueprint(msg)
+blueprint_list = [
+    main, regist, login, userprofile, logout, upload, playchat,
+    build, myStream, stream, msg, index, course
+]
+for cur_bp in blueprint_list:
+    app.register_blueprint(cur_bp)
 
 # before_request/ before_first_request/ after_request
 # @app.before_request
 # def is_login():
-#     if request.path == "/login/":
+#     if request.path == "/login" or request.path == "/main":
 #         return None
 #     if not session.get("name", ''):
-#         return render_template('/login/')
+#         data = dict(
+#             title="登录"
+#         )
+#         return render_template("login.html", data=data)
 
 # html global var
 # @app.context_processor
@@ -57,6 +57,7 @@ app.register_blueprint(msg)
 
 if __name__ == '__main__':
     # app.run()
+
     ChatRouter = sockjs.tornado.SockJSRouter(ChatRoomHandler, '/chatroom')
     wsgi_app = WSGIContainer(app)
     application = tornado.web.Application(

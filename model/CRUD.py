@@ -6,6 +6,8 @@ from werkzeug.security import generate_password_hash  # 生成哈希密码
 import math
 from flask import request
 
+
+
 # 定义生成日期时间的函数
 def dt():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -204,11 +206,33 @@ class CRUD:
 
     # 显示直播信息
     @staticmethod
-    def show_stream(name):
+    def show_stream(name, page):
         connect = ORM.db()
         model = None
         try:
-            model = connect.query(Stream).filter_by(userid=name).order_by(Stream.createdAt.desc())
+            if name == 'all_1mqnabzvxc':
+                model = connect.query(Stream).order_by(Stream.createdAt.desc())
+            else:
+                model = connect.query(Stream).filter_by(userid=name).order_by(Stream.createdAt.desc())
+        except Exception as e:
+            connect.rollback()
+            print(e)
+        else:
+            connect.commit()
+        finally:
+            connect.close()
+        return model.paginate(page=page, per_page=6)
+
+    # 显示直播信息
+    @staticmethod
+    def show_my_stream(name):
+        connect = ORM.db()
+        model = None
+        try:
+            if name == 'all_1mqnabzvxc':
+                model = connect.query(Stream).order_by(Stream.createdAt.desc())
+            else:
+                model = connect.query(Stream).filter_by(userid=name).order_by(Stream.createdAt.desc())
         except Exception as e:
             connect.rollback()
             print(e)
@@ -227,7 +251,7 @@ class CRUD:
         total = model.count()
         if total:
             # 每页显示多少条
-            shownum = 6
+            shownum = 12
             # 确定总共显示多少页
             pagenum = int(math.ceil(total / shownum))
             # 判断小于第一页
@@ -260,3 +284,24 @@ class CRUD:
                 data=[]
             )
         return arr
+
+    @staticmethod
+    def show_video(q):
+        session = ORM.db()
+        res = None
+        try:
+            model = None
+            if q:
+                model = session.query(Video).filter(
+                    Video.name.like('%{}%'.format(q))
+                ).order_by(Video.createdAt.desc())
+            else:
+                model = session.query(Video).order_by(Video.createdAt.desc())
+            res = CRUD.page(model)
+        except Exception as e:
+            session.rollback()
+        else:
+            session.commit()
+        finally:
+            session.close()
+        return res

@@ -1,16 +1,17 @@
 {% extends "layout.html" %}
-
+{%import 'page.html' as pg%}
 {% block content %}
 <div class="col-md-10 pad-right">
     <div class="card">
         <div class="card-header">
             我的直播信息
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a class="btn btn-primary" href="/build/" id="btn-sub">创建直播</a>
         </div>
         <div class="card-body">
             <ul class="list-group">
                 {% set v = data['stream'] %}
-                {% if v['data'] %}
-                {% for val in v['data'] %}
+                {% for val in v %}
                 <li class="list-group-item">
                     <div class="form-group">
                         <div class="row">
@@ -30,11 +31,10 @@
                     </div>
                 </li>
                 {% endfor %}
-                {% endif %}
             </ul>
             <br>
             <div class="form-group">
-                <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">创建直播</a>
+                {{pg.my_paginate(pagination,'myStream.myStream')}}
             </div>
         </div>
     </div>

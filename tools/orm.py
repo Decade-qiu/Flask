@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import mysql.connector  # 导入数据库连接驱动
 from sqlalchemy import create_engine  # 导入创建引擎
-from sqlalchemy.orm import sessionmaker  # 创建会话工具
+from sqlalchemy.orm import sessionmaker, Query  # 创建会话工具
 from config import DB_URI  # 导入连接配置
-
+from flask_sqlalchemy import SQLAlchemy
 
 # 创建会话，操作数据表要通过会话操作
+from model.Pagination import paginate
+
+
 class ORM:
     @classmethod
     def db(cls):
@@ -27,4 +30,5 @@ class ORM:
         )
         # autocommit，自动提交，True[开启]，False[关闭]，采用手动的方式，自己写事务处理的逻辑
         # autoflush，自动刷新权限，True[开启]
+        Query.paginate = paginate
         return Session()

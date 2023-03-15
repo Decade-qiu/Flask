@@ -22,5 +22,4 @@ def playchat():
             title="弹幕视频"
         )
         data['video'] = CRUD.video(vid)
-        # print(data)
         return render_template("playchat.html", data=data)

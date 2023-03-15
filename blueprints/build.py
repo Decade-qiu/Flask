@@ -7,6 +7,7 @@ from flask_mail import Message
 from flask import request
 import string
 import random
+from tools.decorators import is_login
 from tools.forms import *
 from model.models import User
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,6 +16,7 @@ bp = Blueprint("build", __name__)
 
 
 @bp.route("/build/", methods=['GET', 'POST'])
+@is_login
 def build():
     if request.method == 'GET':
         data = dict(

@@ -1,6 +1,7 @@
 
 from flask import Blueprint, render_template, session
 from flask import request
+from tools.decorators import is_login
 from tools.params import data as xz
 from tools.forms import *
 
@@ -8,6 +9,7 @@ bp = Blueprint("userprofile", __name__)
 
 
 @bp.route("/userprofile/", methods=['GET', 'POST'])
+@is_login
 def userprofile():
     if request.method == 'GET':
         data = dict(

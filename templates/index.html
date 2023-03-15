@@ -18,12 +18,12 @@
                 <span>{{ val.name }}</span>
             </div>
         </div>
-        {% end %}
-        {% end %}
+        {% endfor %}
+        {% endif %}
     </div>
-    {% module page(v,data['q']) %}
+    
 </div>
-{% end %}
+{% endblock %}
 
 {% block foot %}
 <script>
@@ -34,4 +34,4 @@
         });
     });
 </script>
-{% end %}
+{% endblock %}

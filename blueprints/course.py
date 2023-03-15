@@ -18,8 +18,9 @@ def course():
         stream=''
     )
     page = request.args.get('page', 1)
-    res = CRUD.show_stream('all_1mqnabzvxc', page)
-    data['stream'] = res
+    res = CRUD.show_stream('all_1mqnabzvxc', int(page))
+    data['stream'] = res.items
     return render_template(
-        "course.html", data=data
+        "course.html", data=data,
+        pagination=res
     )
