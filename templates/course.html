@@ -1,0 +1,50 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="col-md-10 pad-right">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">课程列表</li>
+        </ol>
+    </nav>
+    {% set v = data['stream'] %}
+    <div class="card-columns">
+        {% if v['data'] %}
+        {% for val in v['data'] %}
+        <div class="card video-list" 
+            urlId="{{ val.url }}"
+            streamId="{{ val.id }}">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+                 src="{{ url_for('static', filename='images/blog.jpg') }}">
+            <div class="card-body">
+                <span>{{ val.title }}</span>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block foot %}
+<script>
+    $(document).ready(function () {
+        $(".video-list").click(function () {
+            var locurl = $(this).attr('urlId');
+            var locstream = $(this).attr('streamId');
+            $.ajax({
+                url: "/stream/",
+                data: {url : locurl},
+                dataType: "json",
+                type: "POST",
+                success: function (res) {
+                    location.href = "/stream/?"+"app="+res['app']+"&"+"name="+res['name']+"&id="+locstream;
+                },
+                error: function (res) {
+                    console.log(res);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
