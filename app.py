@@ -4,9 +4,9 @@ import tornado.web
 from tornado.web import Application, FallbackHandler
 from tornado.wsgi import WSGIContainer
 import sockjs.tornado
-
-from flask import Flask, session, g, request, redirect, render_template
 import config
+from flask import Flask, session, g, request, redirect, render_template
+from blueprints.dm import bp as dm
 from blueprints.course import bp as course
 from blueprints.build import bp as build
 from blueprints.login import bp as login
@@ -34,21 +34,10 @@ app.debug=True
 # 视图绑定
 blueprint_list = [
     main, regist, login, userprofile, logout, upload, playchat,
-    build, myStream, stream, msg, index, course
+    build, myStream, stream, msg, index, course, dm
 ]
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)
-
-# before_request/ before_first_request/ after_request
-# @app.before_request
-# def is_login():
-#     if request.path == "/login" or request.path == "/main":
-#         return None
-#     if not session.get("name", ''):
-#         data = dict(
-#             title="登录"
-#         )
-#         return render_template("login.html", data=data)
 
 # html global var
 # @app.context_processor
@@ -56,14 +45,14 @@ for cur_bp in blueprint_list:
 #     return {"user": g.user}
 
 if __name__ == '__main__':
-    # app.run()
-
+    IP = '127.0.0.1' if 1 else '10.40.42.172'
+    # app.run(host='10.40.42.172', port=8000)
     ChatRouter = sockjs.tornado.SockJSRouter(ChatRoomHandler, '/chatroom')
     wsgi_app = WSGIContainer(app)
     application = tornado.web.Application(
         ChatRouter.urls + [(r'.*', FallbackHandler, dict(fallback=wsgi_app))]
     )
-    application.listen(8000)
+    application.listen(8000, address=IP)
     tornado.ioloop.IOLoop.instance().start()
 
 

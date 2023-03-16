@@ -1,15 +1,17 @@
 {% extends "layout.html" %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ static_url('dplayer/DPlayer.min.css') }}">
-<link rel="stylesheet" href="{{ static_url('ue/third-party/SyntaxHighlighter/shCoreDefault.css') }}">
-<script src="{{ static_url('ue/third-party/SyntaxHighlighter/shCore.js') }}"></script>
-<script src="{{ static_url('dplayer/DPlayer.min.js') }}"></script>
-<script type="text/javascript" charset="utf-8" src="{{ static_url('ue/ueditor.config.js') }}"></script>
-<script type="text/javascript" charset="utf-8" src="{{ static_url('ue/ueditor.all.min.js') }}"></script>
-<script type="text/javascript" charset="utf-8" src="{{ static_url('ue/lang/zh-cn/zh-cn.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static',filename='dplayer/DPlayer.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCoreDefault.css') }}">
+<script src="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCore.js') }}"></script>
+<script src="{{ url_for('static',filename='dplayer/DPlayer.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.all.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/lang/zh-cn/zh-cn.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
-{% end %}
+<script src="https://cdn.bootcss.com/flv.js/1.4.0/flv.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+{% endblock %}
 
 {% block content %}
 <div class="col-md-10 pad-right">
@@ -33,27 +35,29 @@
                 <div class="card-body">
                     <form id="form-data">
                         <div class="media">
-                            {% if handler.user %}
+                            <input type="hidden" name="streamid" id="input_id"
+                                       value="{{ data['streamid'] }}">
+                            {% if session.get('name', '') %}
                             <img class="mr-3"
-                                 src="{% if handler.user.face %}/static/uploads/{{ handler.user.face }}{% else %}{{ static_url('images/male.png') }}{% end %}"
+                                 src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
                                  style="width: 60px;height: 60px;">
                             {% else %}
-                            <img class="mr-3" src="{{ static_url('images/male.png') }}"
+                            <img class="mr-3" src="{{ url_for('static', filename='images/male.png') }}"
                                  style="width: 60px;height: 60px;">
-                            {% end %}
+                            {% endif %}
                             <div class="media-body">
-                                <h6>{% if handler.name %}{{ handler.name }}{% else %}游客 <a href="/login/">[登录]</a> <a
-                                        href="/regist/">[注册]</a>{% end %}</h6>
+                                <h6>{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客 <a href="/login/">[登录]</a> <a
+                                        href="/regist/">[注册]</a>{% endif %}</h6>
                                 <textarea name="content" id="editor" style="width: 100%;"></textarea>
                                 <input type="hidden" name="name" id="input_name"
-                                       value="{% if handler.name %}{{ handler.name }}{% else %}游客{% end %}">
-                                {% if handler.user %}
+                                       value="{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客{% endif %}">
+                                {% if session.get('name', '') %}
                                 <input type="hidden" name="face" id="input_face"
-                                       value="{% if handler.user.face %}/static/uploads/{{ handler.user.face }}{% else %}{{ static_url('images/male.png') }}{% end %}">
+                                       value="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}">
                                 {% else %}
                                 <input type="hidden" name="face" id="input_face"
-                                       value="{{ static_url('images/male.png') }}">
-                                {% end %}
+                                       value="{{ url_for('static', filename='images/male.png') }}">
+                                {% endif %}
                             </div>
                         </div>
                     </form>
@@ -64,7 +68,7 @@
         </div>
     </div>
 </div>
-{% end %}
+{% endblock %}
 
 {% block foot %}
 <script>
@@ -92,12 +96,12 @@
             danmaku: {
                 id: "{{ data['video'].id }}",
                 api: '/dm/',
-                user: "{% if handler.name %}{{ handler.name }}{% else %}游客{% end %}"
+                user: "{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客{% endif %}"
             }
         });
     }
 
     dplayer("/static/video/{{ data['video'].url }}");
 </script>
-<script src="{{ static_url('js/chat.js') }}"></script>
-{% end %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}
