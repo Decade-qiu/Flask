@@ -1,21 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <!--指定网页支持响应式：电脑和手机自适应-->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{ data['title'] }}</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='bw/dist/sketchy/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    <style>
+        #mynavbar {
+            background: rgba(32, 92, 152, 0.95);
+            position: fixed;
+            width: 100%;
+            height: 65px;
+            z-index: 10;
+            -webkit-border-radius: 0;
+            -moz-border-radius: 0;
+            border-radius: 0;
+        }
+
+        #main {
+            padding-top: 70px;
+            margin: 0 auto;
+            position: relative;
+        }
+    </style>
     {% block head %}{% endblock %}
 </head>
-<body>
 
-<nav class="navbar navbar-dark bg-primary justify-content-between">
-    <div class="container">
-        <a class="navbar-brand" id="site_name" href="/">2027406022.com</a>
-        <form class="form-inline">
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="mynavbar">
+        <div class="navbar-header">
+            <a class="navbar-brand" style="font-size: 25px;" href="#">DC直播教学网</a>
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" style="font-size: 16px;">首页</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" style="font-size: 16px;">直播</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" style="font-size: 16px;">课程分类</a>
+            </li>
+        </ul>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="input-group col-md-3">
+            <input type="text" id="input_q" class="form-control" placeholder="请输入搜索内容！"
+                aria-label="Recipient's username" aria-describedby="basic-addon2" style="border-radius: 15px;">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" id="btn-search">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <i class="fa fa-bell-o" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
+            <span style="color:white;font-size: 1px;">消息</span>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <i class="fa fa-cloud-download" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
+            <span style="color:white;font-size: 1px;">下载</span>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <i class="fa fa-shopping-cart" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
+            <span style="color:white;font-size: 1px;">购买</span>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <i class="fa fa-history" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
+            <span style="color:white;font-size: 1px;">历史</span>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <form class="form-inline collapse navbar-collapse justify-content-right">
             {% if session.get("name") %}
+            <img class="mr-3 rounded-circle"
+                src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
+                style="width: 60px;height: 60px;">
             <a href="/userprofile/" class="text-warning">{{ session.get("name") }}</a>
             &nbsp;
             <a href="/logout/" class="text-danger">退出</a>
@@ -25,99 +93,126 @@
             <a href="/regist/" class="btn btn-danger my-2 my-sm-0">注册</a>
             {% endif %}
         </form>
-    </div>
-</nav>
-
-<div class="container" id="main">
-    <div class="row">
-        {% block content %}{% endblock %}
-        <div class="col-md-2 pad-left">
-            <div class="input-group mb-3">
-                <input type="text" id="input_q" class="form-control" placeholder="请输入搜索内容！"
-                       aria-label="Recipient's username" aria-describedby="basic-addon2">
-                <div class="input-group-append">
-                    <button class="btn btn-primary" type="button" id="btn-search">搜索</button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    快捷导航
-                </div>
-                <div class="card-body">
-                    <div class="btn-group-vertical">
-                        <button type="button" class="btn btn-info"
-                    onclick="window.location.href='/build/'"
-                    >直播创建</button>
-                    <br>
-                    <button type="button" class="btn btn-info"
-                    onclick="window.location.href='/myStream/'"
-                    >我的直播信息</button> 
-                    <br>
-                    <button type="button" class="btn btn-info"
-                    onclick="window.location.href='/course/'"
-                    >课程列表</button> 
-                    <br>
-                    <button type="button" class="btn btn-info"
-                    onclick="window.location.href='#'"
-                    >帮助</button> 
-                    <br>
-                    <button type="button" class="btn btn-info"
-                    onclick="window.location.href='#'"
-                    >举报</button> 
-                    <br>
-                    <button type="button" class="btn btn-info"
-                    onclick="window.location.href='#'"
-                    >客服</button> 
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="jumbotron foot-section">
-    <hr class="my-4">
-    <div class="container">
+    </nav>
+    <div class="container" id="main">
         <div class="row">
+            {% block content %}{% endblock %}
             <div class="col-md-2">
-            </div>
-            <div class="col-md-4">
-                <h5>Decade</h5>
-                <!-- <p class="info-text">— 人生苦短，我用Python！</p>
-                <p class="info-text">微信：13700632835</p>
-                <p class="info-text">手机：13700632835</p>
-                <p class="info-text">邮箱：3237550600@qq.com</p>
-                <p class="info-text">编程爱好者，多年丰富的项目经验，擅长python、php、golang、centos、reactnative等技术。</p> -->
-            </div>
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-md-4">
-
+                <div class="input-group mb-3">
+                    <input type="text" id="input_q" class="form-control" placeholder="请输入搜索内容！"
+                        aria-label="Recipient's username" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button" id="btn-search">搜索</button>
                     </div>
-
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        快捷导航
+                    </div>
+                    <div class="card-body">
+                        <div class="btn-group-vertical">
+                            <button type="button" class="btn btn-info"
+                                onclick="window.location.href='/build/'">直播创建</button>
+                            <br>
+                            <button type="button" class="btn btn-info"
+                                onclick="window.location.href='/myStream/'">我的直播信息</button>
+                            <br>
+                            <button type="button" class="btn btn-info"
+                                onclick="window.location.href='/course/'">课程列表</button>
+                            <br>
+                            <button type="button" class="btn btn-info" onclick="window.location.href='#'">帮助</button>
+                            <br>
+                            <button type="button" class="btn btn-info" onclick="window.location.href='#'">举报</button>
+                            <br>
+                            <button type="button" class="btn btn-info" onclick="window.location.href='#'">客服</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <hr class="my-4">
-    <div class="container">
-        <ul class="list-inline text-center">
-            <li class="info-text"><a href="http://www.miibeian.gov.cn/" target="_blank">苏ICP备17011280号</a>
-            </li>
-            <li class="info-text">© 2018-2019 Decade</li>
-        </ul>
+    <div class="jumbotron foot-section">
+        <div class="container">
+            <div class="row">
+                <!-- 部分：一 -->
+                <div class="col-md-2">
+                    <p>友情链接</p>
+                    <ul>
+                        <li>腾讯会议</li><br>
+                        <li>钉钉课堂</li><br>
+                        <li>腾讯课堂</li><br>
+                        <li>网易云课堂</li><br>
+                        <li>慕课网</li><br>
+                        <li>阿里云栖社区</li><br>
+                    </ul>
+                </div>
+                <!-- 部分：二 -->
+                <div class="col-md-3">
+                    <p>新手帮助</p>
+                    <ul>
+                        <li>学生使用手册</li><br>
+                        <li>教师使用手册</li><br>
+                        <li>开播教程引导</li><br>
+                        <li>DC直播学院</li><br>
+                        <li>DC安全门户</li><br>
+                        <li>DC监察反舞弊举报</li>
+                    </ul>
+                </div>
+                <!-- 部分：三 -->
+                <div class="col-md-5">
+                    <p>DC产品下载</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="/static/images/qrcode.png">
+                            <br>
+                            <p style="position:relative;">扫描下载DC直播</p>
+                        </div>
+                        <div class="col-md-6">
+                            <i class="fa fa-apple fa-2x" aria-hidden="true"></i>
+                            <span>iPhone版</span><br><br>
+                            <i class="fa fa-android fa-2x" aria-hidden="true"></i>
+                            <span>Android版</span><br><br>
+                            <i class="fa fa-windows fa-2x" aria-hidden="true"></i>
+                            <span>Windows版</span><br><br>
+                            <i class="fa fa-tablet fa-2x" aria-hidden="true"></i>
+                            <span>Pad版</span><br><br>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <b>
+                        <p>关注我们</p>
+                    </b>
+                    <i class="fa fa-weibo fa-2x" aria-hidden="true"></i>
+                    <span>DC官方微博</span><br><br>
+                    <i class="fa fa-weixin fa-2x" aria-hidden="true"></i>
+                    <span>微信公众号</span><br><br>
+                    <i class="fa fa-github fa-2x" aria-hidden="true"></i>
+                    <span>Github地址</span><br><br>
+                </div>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="container">
+            <ul class="list-inline text-center">
+                <li class="info-text"><a href="http://www.miibeian.gov.cn/" target="_blank">苏ICP备17011280号</a>
+                </li>
+                <li class="info-text">© 2023-2033 Decade</li>
+            </ul>
+        </div>
     </div>
-</div>
-<script src="https://cdn.bootcss.com/lazysizes/4.0.2/lazysizes.min.js"></script>
-<script src="https://cdn.bootcss.com/holder/2.9.4/holder.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-{% block foot %}{% endblock %}
-<script>
-    $(document).ready(function () {
-        $("#btn-search").click(function () {
-            var q = $("#input_q").val();
-            location.href = "/?q=" + q
+    <script src="https://cdn.bootcss.com/lazysizes/4.0.2/lazysizes.min.js"></script>
+    <script src="https://cdn.bootcss.com/holder/2.9.4/holder.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    {% block foot %}{% endblock %}
+    <script>
+        $(document).ready(function () {
+            $("#btn-search").click(function () {
+                var q = $("#input_q").val();
+                location.href = "/?q=" + q
+            });
         });
-    });
-</script>
+    </script>
 </body>
+
 </html>

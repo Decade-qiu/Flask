@@ -6,7 +6,7 @@ from config import DB_URI  # 导入连接配置
 from flask_sqlalchemy import SQLAlchemy
 
 # 创建会话，操作数据表要通过会话操作
-from model.Pagination import paginate
+from tools.Pagination import paginate
 
 
 class ORM:
