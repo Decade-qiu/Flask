@@ -18,12 +18,46 @@
                     <p class="text-danger" id="error_title"></p>
                 </div>
                 <div class="form-group">
-                    <label>推流地址(支持rtmp和rtsp)</label>
+                    <label>推流地址</label>
                     <input class="form-control"
                            name="url"
                            placeholder="请输入直播推流地址！"
                            type="text">
                     <p class="text-danger" id="error_url"></p>
+                </div>
+                <div class="form-group">
+                    <label>课程介绍</label>
+                    <textarea class="form-control"
+                              placeholder="请输入课程介绍！"
+                              rows="5"
+                              name="info"></textarea>
+                    <p class="text-danger" id="error_info"></p>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label>直播开始时间</label>
+                        <input class="form-control"
+                               name="title"
+                               placeholder="请输入直播开始时间！"
+                               type="text">
+                        <p class="text-danger" id="error_title"></p>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>直播预计时长</label>
+                        <input class="form-control"
+                               name="title"
+                               placeholder="请输入直播预计时长！"
+                               type="text">
+                        <p class="text-danger" id="error_title"></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>直播密钥(可选)</label>
+                    <input class="form-control"
+                           name="title"
+                           placeholder="请输入不少于6位且由字母、数字和特殊字符组成的密钥"
+                           type="text">
+                    <p class="text-danger" id="error_title"></p>
                 </div>
                 <div class="form-group">
                     <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">发布直播</a>

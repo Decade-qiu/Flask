@@ -6,6 +6,14 @@
     <!--指定网页支持响应式：电脑和手机自适应-->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{ data['title'] }}</title>
+    <!-- 新 Bootstrap4 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <!-- bootstrap.bundle.min.js 用于弹窗、提示、下拉菜单，包含了 popper.min.js -->
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+    <!-- 最新的 Bootstrap4 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='bw/dist/sketchy/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
@@ -26,14 +34,15 @@
             margin: 0 auto;
             position: relative;
         }
+
     </style>
     {% block head %}{% endblock %}
 </head>
 
-<body>
+<body background="/static/images/background.png">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="mynavbar">
         <div class="navbar-header">
-            <a class="navbar-brand" style="font-size: 25px;" href="#">DC直播教学网</a>
+            <a class="navbar-brand" style="font-size: 25px;" href="/">DC直播教学网</a>
         </div>&nbsp;&nbsp;&nbsp;&nbsp;
         <ul class="navbar-nav">
             <li class="nav-item">
@@ -120,18 +129,19 @@
                             <button type="button" class="btn btn-info"
                                 onclick="window.location.href='/course/'">课程列表</button>
                             <br>
-                            <button type="button" class="btn btn-info" onclick="window.location.href='#'">帮助</button>
+                            <button type="button" class="btn btn-info" onclick="window.location.href='/help/'">帮助</button>
                             <br>
-                            <button type="button" class="btn btn-info" onclick="window.location.href='#'">举报</button>
+                            <button type="button" class="btn btn-info" onclick="window.location.href='/complaint/'">投诉</button>
                             <br>
-                            <button type="button" class="btn btn-info" onclick="window.location.href='#'">客服</button>
+                            <button type="button" class="btn btn-info" onclick="window.location.href='/service/'">客服</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="jumbotron foot-section">
+    <br>
+    <div class="jumbotron foot-section" id="foot">
         <div class="container">
             <div class="row">
                 <!-- 部分：一 -->

@@ -10,6 +10,18 @@
         </div>
         <div class="card-body">
             <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                直播标题
+                            </div>
+                            <div class="col-md-4">
+                                开播时间
+                            </div>
+                        </div>
+                    </div>
+                </li>
                 {% set v = data['stream'] %}
                 {% for val in v %}
                 <li class="list-group-item">
@@ -18,14 +30,16 @@
                             <div class="col-md-4">
                                 {{ val.title }}
                             </div>
-                            <div class="col-md-6">
-                                {{ val.url }}
+                            <div class="col-md-4">
+                                2022-3-12 13:00:10
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4">
+                                <a class="btn btn-info stream"
+                                >修改</a>
                                 <a class="btn btn-success stream"
-                                   urlId="{{ val.url }}"
-                                   streamId="{{ val.id }}"
-                                >进入</a>
+                                    urlId="{{ val.url }}"
+                                    streamId="{{ val.id }}">
+                                进入</a>
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,83 @@
+
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static',filename='dplayer/DPlayer.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCoreDefault.css') }}">
+<script src="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCore.js') }}"></script>
+<script src="{{ url_for('static',filename='dplayer/DPlayer.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.all.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/lang/zh-cn/zh-cn.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdn.bootcss.com/flv.js/1.4.0/flv.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">
+                客服
+            </li>
+        </ol>
+    </nav>
+    <div class="row" style="margin-top: 12px;">
+        <div class="col-md-12">
+            <div class="card" id="chat-card">
+                <div class="card-header">聊天消息</div>
+                <div class="card-body" id="chat-list">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form id="form-data">
+                        <div class="media">
+                            <input type="hidden" name="streamid" id="input_id"
+                                       value="{{ data['streamid'] }}">
+                            {% if session.get('name', '') %}
+                            <img class="mr-3"
+                                 src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
+                                 style="width: 60px;height: 60px;">
+                            {% else %}
+                            <img class="mr-3" src="{{ url_for('static', filename='images/male.png') }}"
+                                 style="width: 60px;height: 60px;">
+                            {% endif %}
+                            <div class="media-body">
+                                <h6>{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客 <a href="/login/">[登录]</a> <a
+                                        href="/regist/">[注册]</a>{% endif %}</h6>
+                                <textarea name="content" id="editor" style="width: 100%;"></textarea>
+                                <input type="hidden" name="name" id="input_name"
+                                       value="{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客{% endif %}">
+                                {% if session.get('name', '') %}
+                                <input type="hidden" name="face" id="input_face"
+                                       value="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}">
+                                {% else %}
+                                <input type="hidden" name="face" id="input_face"
+                                       value="{{ url_for('static', filename='images/male.png') }}">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                    <a style="margin-top: 12px;" id="send_msg" class="btn btn-success float-right"
+                       href="javascript:void(0)">发送消息</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block foot %}
+<script>
+    var ue = UE.getEditor('editor', {
+        toolbars: [
+            ['fullscreen', 'emotion', 'insertcode', 'preview']
+        ]
+    });
+</script>
+<script src="{{ url_for('static',filename='js/chat.js') }}"></script>
+{% endblock %}
