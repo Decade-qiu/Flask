@@ -5,7 +5,7 @@ from tornado.web import Application, FallbackHandler
 from tornado.wsgi import WSGIContainer
 import sockjs.tornado
 import config
-from flask import Flask, session, g, request, redirect, render_template
+from flask import Flask, session, g, request, redirect, render_template, url_for
 from blueprints.dm import bp as dm
 from blueprints.course import bp as course
 from blueprints.build import bp as build
@@ -26,6 +26,7 @@ from blueprints.help import bp as hhelp
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 
+
 app = Flask(__name__)
 
 # 阻止跨域请求
@@ -43,10 +44,11 @@ blueprint_list = [
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)
 
-# html global var
-# @app.context_processor
-# def my_context_processor():
-#     return {"user": g.user}
+# global var
+@app.context_processor
+def my_context_processor():
+    user = CRUD.user(session.get('name', ''))
+    return {"user": user}
 
 if __name__ == '__main__':
     IP = '127.0.0.1' if 1 else '10.40.42.172'

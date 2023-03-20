@@ -144,9 +144,13 @@ class UserProfileEditForm(Form):
         ]
     )
 
-# 定义直播创建验证表单模型
+
 class StreamBuildForm(Form):
 
+    def validate_url(self, field):
+        if not field.data.startswith("http://"):
+            raise ValidationError("推流地址只支持http")
+    
     title = StringField(
         "直播标题",
         validators=[
@@ -168,7 +172,4 @@ class StreamBuildForm(Form):
         ]
     )
 
-    def validate_url(self, field):
-        if not field.data.startswith("rtmp") and not field.data.startswith("rtsp"):
-            raise ValidationError("推流地址只支持rtmp和rtsp")
 

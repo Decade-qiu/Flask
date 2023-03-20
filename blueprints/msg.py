@@ -21,7 +21,7 @@ def msg():
     data = CRUD.new_msg(sid)
     result = []
     for v in data:
-        result.append(json.loads(v.content))  # 转化为字典追加
+        result.append(json.loads(v.content))  
     return dict(
             data=result
         )
