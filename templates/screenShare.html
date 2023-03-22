@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="col-md-10 pad-right">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">屏幕</li>
+        </ol>
+    </nav>
+    <video id="localVideo" controls></video>
+</div>
+{% endblock %}
+
+{% block foot %}
+<script>
+    $(document).ready(function () {
+        if (navigator && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+            navigator.mediaDevices.getDisplayMedia({ video: true }).then((mediastream) => {
+                // 返回的是Mediastream，并不是videotrack
+                let videoTrack = mediastream.getVideoTracks()[0];
+
+                // 如果需要播放，则可以直接使用auido播放
+                let videoElement = document.getElementById("localVideo");
+                videoElement.srcObject = mediastream;
+                videoElement.play();
+            }).catch((err) => {
+                // 获取摄像头失败，可以通过 err.name 或者 err.message 来判断错误原因，err并没有返回错误错误码
+            })
+        } else {
+            // 浏览器不支持获取屏幕共享，有可能是当前页面不是https，也可能是当前浏览器不支持屏幕共享
+        }
+    });
+</script>
+{% endblock %}

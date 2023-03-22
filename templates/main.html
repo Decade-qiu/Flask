@@ -29,7 +29,6 @@
                 <span>抽奖</span>
             </div>
         </div>
-        
     </div>
     <div class="card-columns">
         <div class="card video-list" id="stream">
@@ -39,6 +38,15 @@
                 <span>站长直播</span>
             </div>
         </div>
+        <div class="card video-list" id="screenShare">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+             src="{{ url_for('static', filename='images/blog.jpg') }}">
+            <div class="card-body">
+                <span>屏幕分享</span>
+            </div>
+        </div>
+    </div>
+    <div class="card-columns">
     </div>
 </div>
 {% endblock %}
@@ -57,6 +65,9 @@
         });
         $("#stream").click(function () {
             location.href = "/stream/";
+        });
+        $("#screenShare").click(function () {
+            location.href = "/screenShare/";
         });
     });
 </script>

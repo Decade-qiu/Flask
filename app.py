@@ -6,6 +6,7 @@ from tornado.wsgi import WSGIContainer
 import sockjs.tornado
 import config
 from flask import Flask, session, g, request, redirect, render_template, url_for
+from blueprints.screen import bp as screen
 from blueprints.dm import bp as dm
 from blueprints.course import bp as course
 from blueprints.build import bp as build
@@ -39,20 +40,15 @@ app.debug=True
 blueprint_list = [
     main, regist, login, userprofile, logout, upload, playchat,
     build, myStream, stream, msg, index, course, dm, test, service,
-    hhelp
+    hhelp, screen
 ]
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)
 
-# global var
-@app.context_processor
-def my_context_processor():
-    user = CRUD.user(session.get('name', ''))
-    return {"user": user}
 
 if __name__ == '__main__':
-    IP = '127.0.0.1' if 1 else '10.40.42.172'
-    app.run(host=IP, port=8000)
+    IP = '127.0.0.1' if 0 else '10.70.64.143'
+    # app.run(host=IP, port=8000)
     ChatRouter = sockjs.tornado.SockJSRouter(ChatRoomHandler, '/chatroom')
     wsgi_app = WSGIContainer(app)
     application = tornado.web.Application(
