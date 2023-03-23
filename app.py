@@ -47,7 +47,7 @@ for cur_bp in blueprint_list:
 
 
 if __name__ == '__main__':
-    IP = '127.0.0.1' if 0 else '10.70.64.143'
+    IP = '127.0.0.1' if 1 else '10.40.35.90'
     # app.run(host=IP, port=8000)
     ChatRouter = sockjs.tornado.SockJSRouter(ChatRoomHandler, '/chatroom')
     wsgi_app = WSGIContainer(app)

@@ -1,33 +1,397 @@
 {% extends "layout.html" %}
 {% block content %}
+<style>
+    canvas {
+        display: inline-flex;
+        background: #fff;
+        width: 100%;
+        height: 60%;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    *::before {
+        box-sizing: border-box;
+    }
+
+    *::after {
+        box-sizing: border-box;
+    }
+
+    ul {
+        padding: 0;
+    }
+
+    li {
+        list-style: none;
+    }
+
+    .clearfix::after {
+        content: '';
+        display: block;
+        clear: both;
+    }
+
+    .bg-btn {
+        display: inline-block;
+        top: 25px;
+        left: 25px;
+        width: 50px;
+        height: 50px;
+        background: url('/static/images/ic_droplet1.png') center center no-repeat;
+        background-size: 30px 30px;
+        border-radius: 50%;
+        box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
+        cursor: pointer;
+        background-color: #fff;
+    }
+
+    .bg-btn.active {
+        box-shadow: 0 1px 8px 0 rgba(32, 33, 36, 0.28);
+    }
+
+    .tools {
+        position: fixed;
+        left: 0;
+        bottom: 30px;
+        width: 100%;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .tools .container {
+        /* height: 70px; */
+        padding: 8px 20px;
+        border-radius: 40px;
+        box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
+        background: #fff;
+    }
+
+    .tools button {
+        width: 30px;
+        height: 30px;
+        border: none;
+        outline: none;
+        background-size: 20px 20px;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-color: #fff;
+        margin: 0 6px;
+        transition: 0.3s;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .tools button.save {
+        background-image: url('/static/images/save.png');
+    }
+
+    .tools button.brush {
+        background-image: url('/static/images/pen.png');
+    }
+
+    .tools button.eraser {
+        background-image: url('/static/images/eraser.png');
+    }
+
+    .tools button.clear {
+        background-image: url('/static/images/clear.png');
+    }
+
+    .tools button.undo {
+        background-image: url('/static/images/undo_sel.png');
+    }
+
+    .tools button.redo {
+        background-image: url('/static/images/redo_sel.png');
+    }
+
+    .tools button.undo.active {
+        background-image: url('/static/images/undo.png');
+        border-color: transparent;
+    }
+
+    .tools button.redo.active {
+        background-image: url('/static/images/redo.png');
+        border-color: transparent;
+    }
+
+    .tools button.active {
+        border-radius: 5px;
+        border-color: #1398E6;
+    }
+
+    .color-group {
+        display: none;
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        margin-left: -161px;
+        width: 322px;
+        padding: 16px;
+        border-radius: 5px;
+        box-shadow: 0 1px 4px 0 rgba(32, 33, 36, 0.28);
+        background-color: #fff;
+    }
+
+    .color-group .closeBtn,
+    .pen-detail .closeBtn {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        width: 32px;
+        height: 32px;
+        background: url('/static/images/close.png') center center no-repeat;
+        cursor: pointer;
+    }
+
+    .color-group.active {
+        display: block;
+    }
+
+    .color-group h3 {
+        font-weight: 500;
+        margin-bottom: 8px;
+        font-size: 18px;
+    }
+
+    .color-group li {
+        position: relative;
+        float: left;
+        list-style: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin: 4px;
+        cursor: pointer;
+    }
+
+    .color-group li.active::before {
+        position: absolute;
+        left: 4px;
+        top: 4px;
+        content: '';
+        display: block;
+        width: 32px;
+        height: 32px;
+        background: transparent;
+        border: 3px solid #fff;
+        border-radius: 50%;
+    }
+
+    .pen-detail {
+        display: none;
+        position: fixed;
+        left: 50%;
+        margin-left: -140px;
+        bottom: 90px;
+        width: 280px;
+        height: 210px;
+        padding: 20px 24px;
+        border: 1px solid #81A4BD;
+        border-radius: 5px;
+        color: #808FA2;
+        font-style: 18px;
+        background: #fff;
+        font-size: 14px;
+    }
+
+    .pen-detail.active {
+        display: block;
+    }
+
+    .pen-detail p {
+        margin-top: 2px;
+        margin-bottom: 4px;
+    }
+
+    .pen-detail .pen-type li {
+        float: left;
+        width: 30px;
+        height: 30px;
+        background-size: 28px 28px;
+        background-position: center center;
+        background-repeat: no-repeat;
+        cursor: pointer;
+    }
+
+    .pen-detail .pen-type li.pen {
+        background-image: url('/static/images/pen_sel.png');
+    }
+
+    .pen-detail .pen-type li.pen.active {
+        background-image: url('/static/images/pen.png');
+    }
+
+    .pen-detail .pen-type li.line {
+        background-image: url('/static/images/line_sel.png');
+    }
+
+    .pen-detail .pen-type li.line.active {
+        background-image: url('/static/images/line.png');
+    }
+
+    .pen-detail .pen-type li.circle {
+        border-radius: 50%;
+        border: 2px solid #CDCDCD;
+    }
+
+    .pen-detail .pen-type li.circle.active,
+    .pen-detail .pen-type li.rect.active {
+        border-color: #1F1F1F;
+    }
+
+    .pen-detail .pen-type li.rect {
+        border-radius: 4px;
+        border: 2px solid #CDCDCD;
+    }
+
+    .pen-detail .pen-type li+li {
+        margin-left: 28px;
+    }
+
+    .circle-box {
+        line-height: 24px;
+    }
+
+    .circle-box {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        display: inline-block;
+        text-align: center;
+        margin-right: 8px;
+    }
+
+    #thickness {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -1px;
+        margin-top: -1px;
+        background: #000;
+        border-radius: 50%;
+        transform-origin: center;
+        width: 2px;
+        height: 2px;
+    }
+
+    input[type=range] {
+        -webkit-appearance: none;
+        width: 180px;
+        height: 24px;
+        outline: none;
+    }
+
+    input[type='range']::-webkit-slider-runnable-track {
+        background-color: #DBDBDB;
+        height: 4px;
+        border-radius: 5px;
+    }
+
+    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        /* border: 5px solid #fff; */
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #FF4081;
+        cursor: pointer;
+        margin-top: -4px;
+    }
+
+    .pen-color li {
+        position: relative;
+        float: left;
+        list-style: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin: 4px;
+        cursor: pointer;
+    }
+
+    .pen-color li.active::before {
+        position: absolute;
+        left: 3px;
+        top: 3px;
+        content: '';
+        display: block;
+        width: 24px;
+        height: 24px;
+        background: transparent;
+        border: 2px solid #fff;
+        border-radius: 50%;
+    }
+
+    .pen-detail i.showOpacity {
+        display: inline-block;
+        width: 26px;
+        height: 26px;
+        background: #000;
+        border-radius: 50%;
+        margin-right: 4px;
+        margin-left: 4px;
+    }
+
+    @media screen and (max-width: 768px) {
+        .color-group {
+            top: 80px;
+        }
+
+        .tools {
+            bottom: 15px;
+        }
+
+        .pen-detail {
+            bottom: 80px;
+        }
+    }
+</style>
 <div class="col-md-10 pad-right">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">屏幕</li>
+            <li class="breadcrumb-item active" aria-current="page">画板</li>
         </ol>
     </nav>
-    <video id="localVideo" controls></video>
+    <canvas id="canvas">
+    </canvas>
+    <div class="tools card-body">
+        <div class="container">
+            <button class="save" id="save" title="保存"></button>
+            <button class="brush active" id="brush" title="画笔"></button>
+            <button class="eraser" id="eraser" title="橡皮擦"></button>
+            <button class="clear" id="clear" title="清屏"></button>
+            <button class="undo" id="undo" title="撤销"></button>
+            <button class="redo" id="redo" title="再做"></button>
+        </div>
+    </div>
+    <div class="pen-detail card-body" id="penDetail">
+        <i class="closeBtn"></i>
+        <p>笔大小</p>
+        <span class="circle-box"><i id="thickness"></i></span> <input type="range" id="range1" min="1" max="10"
+            value="1">
+        <p>笔颜色</p>
+        <ul class="pen-color clearfix">
+            <li class="color-item active" style="background-color: black;"></li>
+            <li class="color-item" style="background-color: #FF3333;"></li>
+            <li class="color-item" style="background-color: #99CC00;"></li>
+            <li class="color-item" style="background-color: #0066FF;"></li>
+            <li class="color-item" style="background-color: #FFFF33;"></li>
+            <li class="color-item" style="background-color: #33CC66;"></li>
+        </ul>
+        <p>不透明度</p>
+        <i class="showOpacity"></i> <input type="range" id="range2" min="1" max="10" value="1">
+    </div>
 </div>
 {% endblock %}
 
 {% block foot %}
-<script>
-    $(document).ready(function () {
-        if (navigator && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-            navigator.mediaDevices.getDisplayMedia({ video: true }).then((mediastream) => {
-                // 返回的是Mediastream，并不是videotrack
-                let videoTrack = mediastream.getVideoTracks()[0];
-
-                // 如果需要播放，则可以直接使用auido播放
-                let videoElement = document.getElementById("localVideo");
-                videoElement.srcObject = mediastream;
-                videoElement.play();
-            }).catch((err) => {
-                // 获取摄像头失败，可以通过 err.name 或者 err.message 来判断错误原因，err并没有返回错误错误码
-            })
-        } else {
-            // 浏览器不支持获取屏幕共享，有可能是当前页面不是https，也可能是当前浏览器不支持屏幕共享
-        }
-    });
-</script>
+<script src="{{ url_for('static', filename='js/draw.js') }}"></script>
 {% endblock %}

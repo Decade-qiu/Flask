@@ -18,8 +18,13 @@
 <div class="col-md-10 pad-right">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">
-                直播页面
+            <li class="breadcrumb-item active" aria-current="page"
+            id="zhibo">
+                <button>直播页面</button>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page"
+            id="pmfx">
+                <button>屏幕分享</button>
             </li>
         </ol>
     </nav>
@@ -81,17 +86,32 @@
             ['fullscreen', 'emotion', 'insertcode', 'preview']
         ]
     });
+    // "http://127.0.0.1:80/live?port=1935&app="+'{{ data["app"] }}'+'&stream='+'{{ data["name"] }}'
+    var player = null;
 
-    if (flvjs.isSupported()) {
+    var play = function(uurl){
         var videoElement = document.getElementById('videoElement');
-        var flvPlayer = flvjs.createPlayer({
+        if (player != null) {
+            player.pause();
+            player.unload();
+            player.detachMediaElement();
+            player.destroy();
+            player = null;
+        }
+        player = flvjs.createPlayer({
             type: 'flv',
-            url: "http://10.70.64.143:80/live?port=1935&app="+'{{ data["app"] }}'+'&stream='+'{{ data["name"] }}'
+            url: uurl
         });
-        flvPlayer.attachMediaElement(videoElement);
-        flvPlayer.load();
-        flvPlayer.play();
+        player.attachMediaElement(videoElement);
+        player.load();
+        player.play();
     }
+    $("#zhibo").click(function (){
+        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream=video");
+    });
+    $("#pmfx").click(function (){
+        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream=STREAM_NAME");
+    });
 </script>
 <script src="{{ url_for('static',filename='js/chat.js') }}"></script>
 {% endblock %}
