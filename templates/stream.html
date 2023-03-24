@@ -26,6 +26,10 @@
             id="pmfx">
                 <button>屏幕分享</button>
             </li>
+            <li class="breadcrumb-item active" aria-current="page"
+            id="whiteboard">
+                <button>白板</button>
+            </li>
         </ol>
     </nav>
     <div id="dplayer">
@@ -111,6 +115,10 @@
     });
     $("#pmfx").click(function (){
         play("http://127.0.0.1:80/live?port=1935&app=myapp&stream=STREAM_NAME");
+    });
+    $("#whiteboard").click(function (){
+        // 跳转到白板页面
+        window.location.href = "/screenShare/";
     });
 </script>
 <script src="{{ url_for('static',filename='js/chat.js') }}"></script>

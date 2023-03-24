@@ -1,397 +1,167 @@
-{% extends "layout.html" %}
-{% block content %}
-<style>
-    canvas {
-        display: inline-flex;
-        background: #fff;
-        width: 100%;
-        height: 60%;
-    }
+<!DOCTYPE html>
+<html lang="en">
 
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    *::before {
-        box-sizing: border-box;
-    }
-
-    *::after {
-        box-sizing: border-box;
-    }
-
-    ul {
-        padding: 0;
-    }
-
-    li {
-        list-style: none;
-    }
-
-    .clearfix::after {
-        content: '';
-        display: block;
-        clear: both;
-    }
-
-    .bg-btn {
-        display: inline-block;
-        top: 25px;
-        left: 25px;
-        width: 50px;
-        height: 50px;
-        background: url('/static/images/ic_droplet1.png') center center no-repeat;
-        background-size: 30px 30px;
-        border-radius: 50%;
-        box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
-        cursor: pointer;
-        background-color: #fff;
-    }
-
-    .bg-btn.active {
-        box-shadow: 0 1px 8px 0 rgba(32, 33, 36, 0.28);
-    }
-
-    .tools {
-        position: fixed;
-        left: 0;
-        bottom: 30px;
-        width: 100%;
-        height: 50px;
-        display: flex;
-        justify-content: center;
-        text-align: center;
-    }
-
-    .tools .container {
-        /* height: 70px; */
-        padding: 8px 20px;
-        border-radius: 40px;
-        box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
-        background: #fff;
-    }
-
-    .tools button {
-        width: 30px;
-        height: 30px;
-        border: none;
-        outline: none;
-        background-size: 20px 20px;
-        background-position: center center;
-        background-repeat: no-repeat;
-        background-color: #fff;
-        margin: 0 6px;
-        transition: 0.3s;
-        cursor: pointer;
-        border: 2px solid transparent;
-    }
-
-    .tools button.save {
-        background-image: url('/static/images/save.png');
-    }
-
-    .tools button.brush {
-        background-image: url('/static/images/pen.png');
-    }
-
-    .tools button.eraser {
-        background-image: url('/static/images/eraser.png');
-    }
-
-    .tools button.clear {
-        background-image: url('/static/images/clear.png');
-    }
-
-    .tools button.undo {
-        background-image: url('/static/images/undo_sel.png');
-    }
-
-    .tools button.redo {
-        background-image: url('/static/images/redo_sel.png');
-    }
-
-    .tools button.undo.active {
-        background-image: url('/static/images/undo.png');
-        border-color: transparent;
-    }
-
-    .tools button.redo.active {
-        background-image: url('/static/images/redo.png');
-        border-color: transparent;
-    }
-
-    .tools button.active {
-        border-radius: 5px;
-        border-color: #1398E6;
-    }
-
-    .color-group {
-        display: none;
-        position: absolute;
-        top: 50px;
-        left: 50%;
-        margin-left: -161px;
-        width: 322px;
-        padding: 16px;
-        border-radius: 5px;
-        box-shadow: 0 1px 4px 0 rgba(32, 33, 36, 0.28);
-        background-color: #fff;
-    }
-
-    .color-group .closeBtn,
-    .pen-detail .closeBtn {
-        position: absolute;
-        top: 6px;
-        right: 8px;
-        width: 32px;
-        height: 32px;
-        background: url('/static/images/close.png') center center no-repeat;
-        cursor: pointer;
-    }
-
-    .color-group.active {
-        display: block;
-    }
-
-    .color-group h3 {
-        font-weight: 500;
-        margin-bottom: 8px;
-        font-size: 18px;
-    }
-
-    .color-group li {
-        position: relative;
-        float: left;
-        list-style: none;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin: 4px;
-        cursor: pointer;
-    }
-
-    .color-group li.active::before {
-        position: absolute;
-        left: 4px;
-        top: 4px;
-        content: '';
-        display: block;
-        width: 32px;
-        height: 32px;
-        background: transparent;
-        border: 3px solid #fff;
-        border-radius: 50%;
-    }
-
-    .pen-detail {
-        display: none;
-        position: fixed;
-        left: 50%;
-        margin-left: -140px;
-        bottom: 90px;
-        width: 280px;
-        height: 210px;
-        padding: 20px 24px;
-        border: 1px solid #81A4BD;
-        border-radius: 5px;
-        color: #808FA2;
-        font-style: 18px;
-        background: #fff;
-        font-size: 14px;
-    }
-
-    .pen-detail.active {
-        display: block;
-    }
-
-    .pen-detail p {
-        margin-top: 2px;
-        margin-bottom: 4px;
-    }
-
-    .pen-detail .pen-type li {
-        float: left;
-        width: 30px;
-        height: 30px;
-        background-size: 28px 28px;
-        background-position: center center;
-        background-repeat: no-repeat;
-        cursor: pointer;
-    }
-
-    .pen-detail .pen-type li.pen {
-        background-image: url('/static/images/pen_sel.png');
-    }
-
-    .pen-detail .pen-type li.pen.active {
-        background-image: url('/static/images/pen.png');
-    }
-
-    .pen-detail .pen-type li.line {
-        background-image: url('/static/images/line_sel.png');
-    }
-
-    .pen-detail .pen-type li.line.active {
-        background-image: url('/static/images/line.png');
-    }
-
-    .pen-detail .pen-type li.circle {
-        border-radius: 50%;
-        border: 2px solid #CDCDCD;
-    }
-
-    .pen-detail .pen-type li.circle.active,
-    .pen-detail .pen-type li.rect.active {
-        border-color: #1F1F1F;
-    }
-
-    .pen-detail .pen-type li.rect {
-        border-radius: 4px;
-        border: 2px solid #CDCDCD;
-    }
-
-    .pen-detail .pen-type li+li {
-        margin-left: 28px;
-    }
-
-    .circle-box {
-        line-height: 24px;
-    }
-
-    .circle-box {
-        position: relative;
-        width: 24px;
-        height: 24px;
-        display: inline-block;
-        text-align: center;
-        margin-right: 8px;
-    }
-
-    #thickness {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-left: -1px;
-        margin-top: -1px;
-        background: #000;
-        border-radius: 50%;
-        transform-origin: center;
-        width: 2px;
-        height: 2px;
-    }
-
-    input[type=range] {
-        -webkit-appearance: none;
-        width: 180px;
-        height: 24px;
-        outline: none;
-    }
-
-    input[type='range']::-webkit-slider-runnable-track {
-        background-color: #DBDBDB;
-        height: 4px;
-        border-radius: 5px;
-    }
-
-    input[type='range']::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        /* border: 5px solid #fff; */
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #FF4081;
-        cursor: pointer;
-        margin-top: -4px;
-    }
-
-    .pen-color li {
-        position: relative;
-        float: left;
-        list-style: none;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        margin: 4px;
-        cursor: pointer;
-    }
-
-    .pen-color li.active::before {
-        position: absolute;
-        left: 3px;
-        top: 3px;
-        content: '';
-        display: block;
-        width: 24px;
-        height: 24px;
-        background: transparent;
-        border: 2px solid #fff;
-        border-radius: 50%;
-    }
-
-    .pen-detail i.showOpacity {
-        display: inline-block;
-        width: 26px;
-        height: 26px;
-        background: #000;
-        border-radius: 50%;
-        margin-right: 4px;
-        margin-left: 4px;
-    }
-
-    @media screen and (max-width: 768px) {
-        .color-group {
-            top: 80px;
+<head>
+    <meta charset="UTF-8">
+    <!--指定网页支持响应式：电脑和手机自适应-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ data['title'] }}</title>
+    <!-- 新 Bootstrap4 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <!-- bootstrap.bundle.min.js 用于弹窗、提示、下拉菜单，包含了 popper.min.js -->
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+    <!-- 最新的 Bootstrap4 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bw/dist/sketchy/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    <script id="bfwone" type="text/javascript" src="http://repo.bfw.wiki/bfwrepo/js/bfwone.js"></script>
+    <script type="text/javascript">
+        bready(function () {
+            use(["canvas-designer-widget"], function () {
+                var websocket = new WebSocket("ws://web.debug.only.bfw.wiki:8089");
+                var designer = new CanvasDesigner();
+                var olddata = null;
+                designer.widgetHtmlURL = 'http://repo.bfw.wiki/bfwrepo/html/widget.html'; // you can place this file anywhere
+                designer.widgetJsURL = 'http://repo.bfw.wiki/bfwrepo/js/widget.js'; // you can place this file anywhere
+                websocket.onopen = function () {
+                    if (designer.pointsLength > 0) {
+                        designer.sync();
+                    }
+                };
+                websocket.onmessage = function (event) {
+                    if (olddata != event.data) {
+                        console.log("not same");
+                        designer.syncData(JSON.parse(event.data));
+                        olddata = event.data;
+                    }
+                };
+                designer.addSyncListener(function (data) {
+                    var comedata = JSON.stringify(data);
+                    if (olddata != comedata) {
+                        olddata = comedata;
+                        console.log("not the same");
+                        websocket.send(comedata);
+                    }
+                });
+                designer.setSelected('pencil');
+                designer.setTools({
+                    pencil: true,
+                    text: true,
+                    image: true,
+                    pdf: true,
+                    eraser: true,
+                    line: true,
+                    arrow: true,
+                    dragSingle: true,
+                    dragMultiple: true,
+                    arc: true,
+                    rectangle: true,
+                    quadratic: true,
+                    bezier: true,
+                    marker: true,
+                    zoom: true,
+                    lineWidth: true,
+                    colorsPicker: true,
+                    extraOptions: true,
+                    code: true,
+                    undo: true
+                });
+                designer.appendTo(document.getElementById("board"));
+                setInterval(function () {
+                    console.log("update");
+                    designer.sync();
+                },3000);
+            });
+        });
+    </script>
+    <style>
+    #mynavbar {
+            background: rgba(32, 92, 152, 0.95);
+            position: fixed;
+            width: 100%;
+            height: 65px;
+            z-index: 10;
+            -webkit-border-radius: 0;
+            -moz-border-radius: 0;
+            border-radius: 0;
         }
 
-        .tools {
-            bottom: 15px;
+        #board {
+            padding-top: 70px;
+            margin: 0 auto;
+            position: relative;
         }
+    </style>
+</head>
 
-        .pen-detail {
-            bottom: 80px;
-        }
-    }
-</style>
-<div class="col-md-10 pad-right">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">画板</li>
-        </ol>
-    </nav>
-    <canvas id="canvas">
-    </canvas>
-    <div class="tools card-body">
-        <div class="container">
-            <button class="save" id="save" title="保存"></button>
-            <button class="brush active" id="brush" title="画笔"></button>
-            <button class="eraser" id="eraser" title="橡皮擦"></button>
-            <button class="clear" id="clear" title="清屏"></button>
-            <button class="undo" id="undo" title="撤销"></button>
-            <button class="redo" id="redo" title="再做"></button>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="mynavbar">
+        <div class="navbar-header">
+            <a class="navbar-brand" style="font-size: 25px;" href="/">DC直播教学网</a>
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" style="font-size: 16px;">首页</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" style="font-size: 16px;">直播</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" style="font-size: 16px;">课程分类</a>
+            </li>
+        </ul>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="input-group col-md-3">
+            <input type="text" id="input_q" class="form-control" placeholder="请输入搜索内容！"
+                aria-label="Recipient's username" aria-describedby="basic-addon2" style="border-radius: 15px;">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" id="btn-search">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
         </div>
-    </div>
-    <div class="pen-detail card-body" id="penDetail">
-        <i class="closeBtn"></i>
-        <p>笔大小</p>
-        <span class="circle-box"><i id="thickness"></i></span> <input type="range" id="range1" min="1" max="10"
-            value="1">
-        <p>笔颜色</p>
-        <ul class="pen-color clearfix">
-            <li class="color-item active" style="background-color: black;"></li>
-            <li class="color-item" style="background-color: #FF3333;"></li>
-            <li class="color-item" style="background-color: #99CC00;"></li>
-            <li class="color-item" style="background-color: #0066FF;"></li>
-            <li class="color-item" style="background-color: #FFFF33;"></li>
-            <li class="color-item" style="background-color: #33CC66;"></li>
-        </ul>
-        <p>不透明度</p>
-        <i class="showOpacity"></i> <input type="range" id="range2" min="1" max="10" value="1">
-    </div>
-</div>
-{% endblock %}
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <i class="fa fa-bell-o" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
+            <span style="color:white;font-size: 1px;">消息</span>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <i class="fa fa-cloud-download" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
+            <span style="color:white;font-size: 1px;">下载</span>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <i class="fa fa-shopping-cart" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
+            <span style="color:white;font-size: 1px;">购买</span>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <i class="fa fa-history" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
+            <span style="color:white;font-size: 1px;">历史</span>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <form class="form-inline collapse navbar-collapse justify-content-right">
+            {% if session.get("name") %}
+            <img class="mr-3 rounded-circle"
+                src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
+                style="width: 60px;height: 60px;">
+            <a href="/userprofile/" class="text-warning">{{ session.get("name") }}</a>
+            &nbsp;
+            <a href="/logout/" class="text-danger">退出</a>
+            {% else %}
+            <a href="/login/" class="btn btn-success my-2 my-sm-0">登录</a>
+            &nbsp;
+            <a href="/regist/" class="btn btn-danger my-2 my-sm-0">注册</a>
+            {% endif %}
+        </form>
+    </nav>
+    <div id="board" style="width:97vw;height:97vh;color: white;"></div>
+</body>
 
-{% block foot %}
-<script src="{{ url_for('static', filename='js/draw.js') }}"></script>
-{% endblock %}
+</html>
