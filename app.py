@@ -1,4 +1,5 @@
 from blueprints.chatroom import ChatRoomHandler
+from blueprints.board import CanvasConnection as BoardHandler
 import tornado.ioloop
 import tornado.web
 from tornado.web import Application, FallbackHandler
@@ -26,16 +27,12 @@ from blueprints.service import bp as service
 from blueprints.help import bp as hhelp
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
-
+from flask_cors import CORS
 
 app = Flask(__name__)
-
-# 阻止跨域请求
-# CSRFProtect(app)
-# 绑定配置文件
+CORS(app, supports_credentials=True)
 app.config.from_object(config)
 app.debug=True
-
 # 视图绑定
 blueprint_list = [
     main, regist, login, userprofile, logout, upload, playchat,
@@ -45,14 +42,25 @@ blueprint_list = [
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)
 
+# socketio = SocketIO(app)
+# @socketio.on('connect')
+# def handle_connect():
+#     print('Client connected')
+# @socketio.on('disconnect')
+# def handle_disconnect():
+#     print('Client disconnected')
+# @socketio.on('sync')
+# def handle_sync(data):
+#     emit('sync', data, broadcast=True)
 
 if __name__ == '__main__':
-    IP = '127.0.0.1' if 1 else '10.40.35.90'
+    IP = '127.0.0.1' if 1 else '20.249.103.98'
     # app.run(host=IP, port=8000)
     ChatRouter = sockjs.tornado.SockJSRouter(ChatRoomHandler, '/chatroom')
+    BoardRouter = sockjs.tornado.SockJSRouter(BoardHandler, '/board')
     wsgi_app = WSGIContainer(app)
     application = tornado.web.Application(
-        ChatRouter.urls + [(r'.*', FallbackHandler, dict(fallback=wsgi_app))]
+        ChatRouter.urls + BoardRouter.urls + [(r'.*', FallbackHandler, dict(fallback=wsgi_app))]
     )
     application.listen(8000, address=IP)
     tornado.ioloop.IOLoop.instance().start()
