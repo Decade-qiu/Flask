@@ -1,100 +1,54 @@
-
 import sys
-import datetime
-import os
+from PyQt5.QtCore import QUrl
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QFrame, QStackedLayout
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtMultimediaWidgets import QVideoWidget
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+class Player(QMainWindow):
+    def __init__(self):
+        super().__init__()
 
-from sqlalchemy import Column  # 定义字段
-from sqlalchemy.dialects.mysql import *  # 导入字段类型
-from werkzeug.security import check_password_hash  # 检查密码
-from sqlalchemy.orm import declarative_base
-Base = declarative_base()
+        # 创建Qt窗口
+        self.setWindowTitle('RTMP Player')
+        self.setGeometry(100, 100, 800, 600)
 
-class Stream(Base):
-    __tablename__ = "stream"
-    id = Column(INTEGER, primary_key=True)  # 编号
-    title = Column(VARCHAR(20), nullable=False, unique=True)  #
-    url = Column(VARCHAR(255), nullable=False)  #
-    createdAt = Column(DATETIME, nullable=False)  # 创建时间
-    userid = Column(VARCHAR(20), nullable=True)
-    # updatedAt = Column(DATETIME, nullable=False)  # 修改时间
+        # 创建QMediaPlayer和QVideoWidget实例
+        self.media_player = QMediaPlayer(self)
+        self.video_widget = QVideoWidget(self)
 
-SECRET_KEY = "asdfasdfjasdfjasd;lf"
+        # 设置QVideoWidget的大小策略
+        self.video_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-# 数据库的配置信息
-HOSTNAME = '127.0.0.1'
-PORT = '3306'
-DATABASE = 'chatroom_project'
-USERNAME = 'root'
-PASSWORD = '123456'
-DB_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8'.format(USERNAME, PASSWORD, HOSTNAME, PORT, DATABASE)
-SQLALCHEMY_DATABASE_URI = DB_URI
+        # 创建垂直布局和水平布局
+        vertical_layout = QVBoxLayout()
+        horizontal_layout = QHBoxLayout()
 
+        # 将QVideoWidget添加到水平布局中
+        horizontal_layout.addWidget(self.video_widget)
 
-# redis主机、端口、库
-redis_configs = dict(
-    host="localhost",
-    port=6379,
-    db=0
-)
+        # 创建QFrame并将其添加到垂直布局中
+        frame = QFrame(self)
+        frame.setLayout(horizontal_layout)
+        vertical_layout.addWidget(frame)
 
-# 邮箱配置
-MAIL_SERVER = "smtp.qq.com"
-MAIL_USE_SSL = True
-MAIL_PORT = 465
-MAIL_USERNAME = "3622739389@qq.com"
-MAIL_PASSWORD = "aguyecxruwelcjgb"
-MAIL_DEFAULT_SENDER = "3622739389@qq.com"
+        # 创建QWidget并将垂直布局设置为其布局
+        widget = QWidget(self)
+        widget.setLayout(vertical_layout)
+        self.setCentralWidget(widget)
 
-def dt():
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # 设置QMediaPlayer的媒体内容
+        media_url = QUrl("rtmp://localhost:1935/myapp/video")
+        media_content = QMediaContent(media_url)
+        self.media_player.setMedia(media_content)
 
-class ORM:
-    @classmethod
-    def db(cls):
-        link = DB_URI
-        # 创建连接引擎，encoding编码，echo是[True]否[False]输出日志
-        engine = create_engine(
-            link,
-            echo=False,
-            pool_size=100,
-            pool_recycle=10,
-            connect_args={'charset': "utf8"}
-        )
-        # 创建用于操作数据表的会话
-        Session = sessionmaker(
-            bind=engine,
-            autocommit=False,
-            autoflush=True,
-            expire_on_commit=False
-        )
-        # autocommit，自动提交，True[开启]，False[关闭]，采用手动的方式，自己写事务处理的逻辑
-        # autoflush，自动刷新权限，True[开启]
-        return Session()
+        # 设置QMediaPlayer的视频输出
+        self.media_player.setVideoOutput(self.video_widget)
 
-p1 = sys.argv[1]
-p2 = sys.argv[2]
+        # 播放视频
+        self.media_player.play()
 
-connect = ORM.db()
-try:
-    stream = Stream(
-        title=p1,
-        url="http://127.0.0.1:80/live?port=1935&app="+p1+"&stream="+p2,
-        createdAt=dt(),
-        userid="decade"
-    )
-    connect.add(stream)
-except Exception as e:
-    connect.rollback()
-    print("Failed!")
-else:
-    connect.commit()
-    print("Success!")
-    print("Your url is "+"http://127.0.0.1:80/live?port=1935&app="+p1+"&stream="+p2)
-finally:
-    connect.close()
-
-play = "ffplay http://127.0.0.1:80/live?port=1935&app=myapp&stream=video"
-os.system(play)
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    player = Player()
+    player.show()
+    sys.exit(app.exec_())
