@@ -1,1 +1,1 @@
-   main_layout = QVBoxLayout()
+(135, 206, 235)

@@ -54,7 +54,7 @@ for cur_bp in blueprint_list:
 #     emit('sync', data, broadcast=True)
 
 if __name__ == '__main__':
-    IP = '127.0.0.1' if 1 else '20.249.103.98'
+    IP = '127.0.0.1' if 1 else '10.70.111.104'
     # app.run(host=IP, port=8000)
     ChatRouter = sockjs.tornado.SockJSRouter(ChatRoomHandler, '/chatroom')
     BoardRouter = sockjs.tornado.SockJSRouter(BoardHandler, '/board')

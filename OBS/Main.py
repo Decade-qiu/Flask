@@ -1,10 +1,15 @@
+import json
 import sys, cv2
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from subprocess import run
 import subprocess
 import sys
 import datetime
+from tornado.websocket import WebSocketClientConnection
+from tornado.httpclient import HTTPRequest
+from tornado.websocket import websocket_connect
 import os
 os.environ['PYTHON_VLC_MODULE_PATH'] = "E://DeskTop//flask//OBS//VLC"
 import time, vlc
@@ -15,7 +20,15 @@ from sqlalchemy import Column  # 定义字段
 from sqlalchemy.dialects.mysql import *  # 导入字段类型
 from werkzeug.security import check_password_hash  # 检查密码
 from sqlalchemy.orm import declarative_base
+
 Base = declarative_base()
+class Msg(Base):
+    __tablename__ = "msg"
+    id = Column(BIGINT, primary_key=True)  # 编号
+    content = Column(TEXT)  # 消息
+    streamId = Column(INTEGER)
+    createdAt = Column(DATETIME, nullable=False)  # 创建时间
+    updatedAt = Column(DATETIME, nullable=False)  # 修改时间
 class Stream(Base):
     __tablename__ = "stream"
     id = Column(INTEGER, primary_key=True)  # 编号
@@ -50,12 +63,6 @@ USERNAME = 'root'
 PASSWORD = '123456'
 DB_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8'.format(USERNAME, PASSWORD, HOSTNAME, PORT, DATABASE)
 SQLALCHEMY_DATABASE_URI = DB_URI
-# redis主机、端口、库
-redis_configs = dict(
-    host="localhost",
-    port=6379,
-    db=0
-)
 def dt():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 class ORM:
@@ -189,6 +196,9 @@ class OBS(QWidget):
         # 设置窗口标题和大小
         self.setWindowTitle("OBS直播推流界面")
         self.resize(800*2.3, 600*2.3)
+        # bg_image = QPixmap("./bg.png")
+        self.setObjectName("Main")
+        self.setStyleSheet("#Main{background-color:rgb(176, 196, 222);}")
         # 创建登录按钮
         self.login_button = QPushButton("登录")
         self.login_button.clicked.connect(self.on_login_button_clicked)
@@ -197,9 +207,6 @@ class OBS(QWidget):
         self.preview_label.setAlignment(Qt.AlignCenter)
         self.preview_label.setStyleSheet("border: 1px solid black;")
         self.preview_label.setScaledContents(True)
-        # 创建弹幕聊天区域
-        self.chat_edit = QTextEdit()
-        self.chat_edit.setReadOnly(True)
         # 创建推流设置区域
         self.stream_settings_box = QVBoxLayout()
         self.stream_url_edit = QLineEdit()
@@ -208,6 +215,11 @@ class OBS(QWidget):
         self.stream_key_edit = QLineEdit()
         self.stream_key_edit.setPlaceholderText("推流密钥")
         self.stream_settings_box.addWidget(self.stream_key_edit)
+        # 创建推流来源选择框
+        self.stream_source_combo = QComboBox()
+        self.stream_source_combo.addItem("摄像头")
+        self.stream_source_combo.addItem("桌面")
+        self.stream_settings_box.addWidget(self.stream_source_combo)
         # 创建开始
         self.start_stop_button = QPushButton("开始")
         self.start_stop_button.setFixedWidth(100)
@@ -234,6 +246,11 @@ class OBS(QWidget):
         video_widget.setLayout(video_layout)
         splitter.addWidget(video_widget)
         # 将弹幕聊天窗口添加到分裂器的右侧
+        self.chat_edit = QTextEdit()
+        self.chat_edit.setReadOnly(True)  # 禁止编辑
+        self.chat_edit.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        # 修改聊天窗口颜色为灰色
+        self.chat_edit.setStyleSheet("background-color: #F2F2F2;")
         chat_widget = QWidget()
         chat_layout = QVBoxLayout()
         chat_layout.addWidget(self.chat_edit)
@@ -249,7 +266,6 @@ class OBS(QWidget):
         self.button_frame.setLayout(button_layout)
         main_layout.addWidget(self.button_frame)
         self.setLayout(main_layout)
-
     def on_login_button_clicked(self):
         # 创建登录对话框，让用户输入用户名和密码
         dialog = QDialog()
@@ -288,15 +304,12 @@ class OBS(QWidget):
             self.login_button.setText(username)
     def on_stop_button_clicked(self):
         self.player.stop()
+        self.player = None
+        self.start_stop_button.setText("开始")
+        self.timer = None
+        self.chat_edit.clear()
+        self.p.kill()
     def on_start_stop_button_clicked(self):
-        if self.player != None:
-            if self.player.get_state() == 1:
-                self.player.pause()
-                self.start_stop_button.setText("开始")
-            if self.player.get_state() == 0:
-                self.player.play()
-                self.start_stop_button.setText("暂停")
-            return
         # 获取推流地址和密钥
         stream_url = self.stream_url_edit.text()
         stream_key = self.stream_key_edit.text()
@@ -305,6 +318,14 @@ class OBS(QWidget):
             return
         if not stream_url or not stream_key:
             QMessageBox.warning(self, "推流设置", "推流地址或密钥不能为空！")
+            return
+        if self.player != None:
+            if self.player.get_state() == 1:
+                self.player.pause()
+                self.start_stop_button.setText("开始")
+            if self.player.get_state() == 0:
+                self.player.play()
+                self.start_stop_button.setText("暂停")
             return
         connect = ORM.db()
         try:
@@ -324,12 +345,32 @@ class OBS(QWidget):
         finally:
             connect.close()
         url = r'ffmpeg -f dshow -i video="@device_pnp_\\?\usb#vid_04f2&pid_b67c&mi_00#6&26fcf372&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global" -f dshow -i audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4AEC28D7-6B71-40EA-9CE2-8BED96C1541C}" -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
-        p = subprocess.Popen(url, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print("********正在推流!********")
+        if self.stream_source_combo.currentText() != "摄像头":
+            url = r'ffmpeg -f gdigrab -i desktop -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
+        self.p = subprocess.Popen(url, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stream_url = "rtmp://127.0.0.1:1935/"+stream_url+"/"+stream_key
         self.player = Player()
         self.player.media.set_hwnd(self.preview_label.winId())
         self.player.play(stream_url)
         self.start_stop_button.setText("暂停")
+        # 创建定时器，每隔1秒钟执行一次读取数据库操作
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.read_from_database)
+        self.timer.start(1000)  # 1秒钟
+    def insert_message(self, message, color):
+        self.chat_edit.append('<span style="color:{};">{}</span><br>'.format(color, message))
+    def read_from_database(self):
+        # 从数据库读取聊天记录
+        session = ORM.db()
+        chat_records = session.query(Msg).all()
+        # 将聊天记录显示到聊天区
+        session.close()
+        self.chat_edit.clear()
+        for chat_record in chat_records:
+            data = json.loads(chat_record.content)
+            self.insert_message(data['name'] + "["+str(chat_record.createdAt)+"]"+": ", 'blue')
+            self.insert_message(data['content'], 'red')
 
 
 
