@@ -1,5 +1,7 @@
+import ctypes
 import json
 import sys, cv2
+import threading
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -308,7 +310,6 @@ class OBS(QWidget):
         self.start_stop_button.setText("开始")
         self.timer = None
         self.chat_edit.clear()
-        self.p.kill()
     def on_start_stop_button_clicked(self):
         # 获取推流地址和密钥
         stream_url = self.stream_url_edit.text()
@@ -344,11 +345,13 @@ class OBS(QWidget):
             QMessageBox.information(self, "Sucess", "你的推流地址为\n"+"http://127.0.0.1:80/live?port=1935&app="+stream_url+"&stream="+stream_key)
         finally:
             connect.close()
-        url = r'ffmpeg -f dshow -i video="@device_pnp_\\?\usb#vid_04f2&pid_b67c&mi_00#6&26fcf372&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global" -f dshow -i audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4AEC28D7-6B71-40EA-9CE2-8BED96C1541C}" -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
+        self.url = r'ffmpeg -f dshow -i video="@device_pnp_\\?\usb#vid_04f2&pid_b67c&mi_00#6&26fcf372&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global" -f dshow -i audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4AEC28D7-6B71-40EA-9CE2-8BED96C1541C}" -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
         print("********正在推流!********")
         if self.stream_source_combo.currentText() != "摄像头":
-            url = r'ffmpeg -f gdigrab -i desktop -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
-        self.p = subprocess.Popen(url, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.url = r'ffmpeg -f gdigrab -i desktop -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
+        self.th = threading.Thread(target=self.Display)
+        self.th.start()
+        print(self.url)
         stream_url = "rtmp://127.0.0.1:1935/"+stream_url+"/"+stream_key
         self.player = Player()
         self.player.media.set_hwnd(self.preview_label.winId())
@@ -358,6 +361,8 @@ class OBS(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.read_from_database)
         self.timer.start(1000)  # 1秒钟
+    def Display(self):
+        subprocess.Popen(self.url, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     def insert_message(self, message, color):
         self.chat_edit.append('<span style="color:{};">{}</span><br>'.format(color, message))
     def read_from_database(self):
