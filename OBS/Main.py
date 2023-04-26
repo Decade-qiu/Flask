@@ -1,27 +1,15 @@
-import ctypes
-import json
-import sys, cv2
-import threading
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from subprocess import run
-import subprocess
-import sys
-import datetime
-from tornado.websocket import WebSocketClientConnection
-from tornado.httpclient import HTTPRequest
-from tornado.websocket import websocket_connect
-import os
+from PyQt5.QtWebEngineWidgets import *
+import wx.html2 as html2
+import subprocess, sys, datetime, psutil, signal, threading, json, os, wx
 os.environ['PYTHON_VLC_MODULE_PATH'] = "E://DeskTop//flask//OBS//VLC"
-import time, vlc
-from matplotlib import image
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column  # 定义字段
-from sqlalchemy.dialects.mysql import *  # 导入字段类型
-from werkzeug.security import check_password_hash  # 检查密码
-from sqlalchemy.orm import declarative_base
+import vlc
+from sqlalchemy import *
+from sqlalchemy.orm import *
+from sqlalchemy.dialects.mysql import *  
+from werkzeug.security import check_password_hash 
 
 Base = declarative_base()
 class Msg(Base):
@@ -57,7 +45,6 @@ class User(Base):
     def check_pwd(self, pwd):
         return check_password_hash(self.pwd, pwd) 
 SECRET_KEY = "asdfasdfjasdfjasd;lf"
-# 数据库的配置信息
 HOSTNAME = '127.0.0.1'
 PORT = '3306'
 DATABASE = 'chatroom_project'
@@ -65,13 +52,21 @@ USERNAME = 'root'
 PASSWORD = '123456'
 DB_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8'.format(USERNAME, PASSWORD, HOSTNAME, PORT, DATABASE)
 SQLALCHEMY_DATABASE_URI = DB_URI
+class MainWindow(wx.Frame):
+    def __init__(self):
+        super().__init__(None, title='White Board')
+        self.webview = html2.WebView.New(self)
+        self.webview.LoadURL('http://localhost:8000/screenShare/')
+        self.SetClientSize((800*2, 600*2)) 
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.webview, 1, wx.EXPAND)
+        self.SetSizer(sizer)
 def dt():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 class ORM:
     @classmethod
     def db(cls):
         link = DB_URI
-        # 创建连接引擎，encoding编码，echo是[True]否[False]输出日志
         engine = create_engine(
             link,
             echo=False,
@@ -86,8 +81,6 @@ class ORM:
             autoflush=True,
             expire_on_commit=False
         )
-        # autocommit，自动提交，True[开启]，False[关闭]，采用手动的方式，自己写事务处理的逻辑
-        # autoflush，自动刷新权限，True[开启]
         return Session()
 class Player:
     '''
@@ -198,12 +191,14 @@ class OBS(QWidget):
         # 设置窗口标题和大小
         self.setWindowTitle("OBS直播推流界面")
         self.resize(800*2.3, 600*2.3)
-        # bg_image = QPixmap("./bg.png")
         self.setObjectName("Main")
         self.setStyleSheet("#Main{background-color:rgb(176, 196, 222);}")
         # 创建登录按钮
         self.login_button = QPushButton("登录")
         self.login_button.clicked.connect(self.on_login_button_clicked)
+        # 创建画板按钮并连接槽函数
+        self.draw_button = QPushButton("画板")
+        self.draw_button.clicked.connect(self.on_draw_button_clicked)
         # 创建视频预览区域
         self.preview_label = QLabel("视频预览区域")
         self.preview_label.setAlignment(Qt.AlignCenter)
@@ -233,6 +228,7 @@ class OBS(QWidget):
         # 创建顶部布局，包含登录按钮和标题
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.login_button)
+        top_layout.addWidget(self.draw_button)
         top_layout.addStretch()
         top_layout.addWidget(QLabel("OBS直播推流界面"))
         top_layout.addStretch()
@@ -304,12 +300,19 @@ class OBS(QWidget):
             # 登录成功
             QMessageBox.information(self, "登录", "登录成功！")
             self.login_button.setText(username)
+    def kill_ffmpeg(self):
+        connections = psutil.net_connections(kind='tcp')
+        for conn in connections:
+            if conn.status == psutil.CONN_ESTABLISHED and conn.laddr.port == 1935:
+                os.kill(conn.pid, signal.SIGTERM)
+                break
     def on_stop_button_clicked(self):
+        self.start_stop_button.setText("开始")
         self.player.stop()
         self.player = None
-        self.start_stop_button.setText("开始")
         self.timer = None
         self.chat_edit.clear()
+        self.kill_ffmpeg()
     def on_start_stop_button_clicked(self):
         # 获取推流地址和密钥
         stream_url = self.stream_url_edit.text()
@@ -351,7 +354,6 @@ class OBS(QWidget):
             self.url = r'ffmpeg -f gdigrab -i desktop -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
         self.th = threading.Thread(target=self.Display)
         self.th.start()
-        print(self.url)
         stream_url = "rtmp://127.0.0.1:1935/"+stream_url+"/"+stream_key
         self.player = Player()
         self.player.media.set_hwnd(self.preview_label.winId())
@@ -376,8 +378,12 @@ class OBS(QWidget):
             data = json.loads(chat_record.content)
             self.insert_message(data['name'] + "["+str(chat_record.createdAt)+"]"+": ", 'blue')
             self.insert_message(data['content'], 'red')
-
-
+    def on_draw_button_clicked(self):
+        app = wx.App()
+        window = MainWindow()
+        window.Show()
+        app.MainLoop()
+        
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

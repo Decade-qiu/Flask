@@ -42,16 +42,6 @@ blueprint_list = [
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)
 
-# socketio = SocketIO(app)
-# @socketio.on('connect')
-# def handle_connect():
-#     print('Client connected')
-# @socketio.on('disconnect')
-# def handle_disconnect():
-#     print('Client disconnected')
-# @socketio.on('sync')
-# def handle_sync(data):
-#     emit('sync', data, broadcast=True)
 
 if __name__ == '__main__':
     IP = '127.0.0.1' if 1 else '10.70.111.104'
