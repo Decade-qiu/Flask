@@ -81,90 +81,9 @@
             });
         });
     </script>
-    <style>
-    #mynavbar {
-            background: rgba(32, 92, 152, 0.95);
-            position: fixed;
-            width: 100%;
-            height: 65px;
-            z-index: 10;
-            -webkit-border-radius: 0;
-            -moz-border-radius: 0;
-            border-radius: 0;
-        }
-
-        #board {
-            padding-top: 70px;
-            margin: 0 auto;
-            position: relative;
-        }
-    </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="mynavbar">
-        <div class="navbar-header">
-            <a class="navbar-brand" style="font-size: 25px;" href="/">DC直播教学网</a>
-        </div>&nbsp;&nbsp;&nbsp;&nbsp;
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link active" href="#" style="font-size: 16px;">首页</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" style="font-size: 16px;">直播</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" style="font-size: 16px;">课程分类</a>
-            </li>
-        </ul>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div class="input-group col-md-3">
-            <input type="text" id="input_q" class="form-control" placeholder="请输入搜索内容！"
-                aria-label="Recipient's username" aria-describedby="basic-addon2" style="border-radius: 15px;">
-            <div class="input-group-append">
-                <button class="btn btn-primary" type="button" id="btn-search">
-                    <i class="fa fa-search"></i>
-                </button>
-            </div>
-        </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div>
-            <i class="fa fa-bell-o" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
-            <span style="color:white;font-size: 1px;">消息</span>
-        </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div>
-            <i class="fa fa-cloud-download" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
-            <span style="color:white;font-size: 1px;">下载</span>
-        </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div>
-            <i class="fa fa-shopping-cart" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
-            <span style="color:white;font-size: 1px;">购买</span>
-        </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div>
-            <i class="fa fa-history" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
-            <span style="color:white;font-size: 1px;">历史</span>
-        </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <form class="form-inline collapse navbar-collapse justify-content-right">
-            {% if session.get("name") %}
-            <img class="mr-3 rounded-circle"
-                src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
-                style="width: 60px;height: 60px;">
-            <a href="/userprofile/" class="text-warning">{{ session.get("name") }}</a>
-            &nbsp;
-            <a href="/logout/" class="text-danger">退出</a>
-            {% else %}
-            <a href="/login/" class="btn btn-success my-2 my-sm-0">登录</a>
-            &nbsp;
-            <a href="/regist/" class="btn btn-danger my-2 my-sm-0">注册</a>
-            {% endif %}
-        </form>
-    </nav>
     <div id="board" style="width:97vw;height:97vh;color: white;"></div>
 </body>
 

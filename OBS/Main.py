@@ -1,15 +1,25 @@
+import datetime
+import json
+import os
+import signal
+import subprocess
+import sys
+import threading
+
+import psutil
+import wx
+import wx.html2 as html2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
-import wx.html2 as html2
-import subprocess, sys, datetime, psutil, signal, threading, json, os, wx
+from PyQt5.QtWidgets import *
+from PyQt5.QtChart import *
 os.environ['PYTHON_VLC_MODULE_PATH'] = "E://DeskTop//flask//OBS//VLC"
 import vlc
 from sqlalchemy import *
+from sqlalchemy.dialects.mysql import *
 from sqlalchemy.orm import *
-from sqlalchemy.dialects.mysql import *  
-from werkzeug.security import check_password_hash 
+from werkzeug.security import check_password_hash
 
 Base = declarative_base()
 class Msg(Base):
@@ -188,6 +198,7 @@ class OBS(QWidget):
         super().__init__()
         self.player = None
         self.p = None
+        self.chart_dialog = None
         # 设置窗口标题和大小
         self.setWindowTitle("OBS直播推流界面")
         self.resize(800*2.3, 600*2.3)
@@ -199,6 +210,9 @@ class OBS(QWidget):
         # 创建画板按钮并连接槽函数
         self.draw_button = QPushButton("画板")
         self.draw_button.clicked.connect(self.on_draw_button_clicked)
+        # 创建签到按钮并连接槽函数
+        self.checkin_button = QPushButton("签到")
+        self.checkin_button.clicked.connect(self.on_checkin_button_clicked)
         # 创建视频预览区域
         self.preview_label = QLabel("视频预览区域")
         self.preview_label.setAlignment(Qt.AlignCenter)
@@ -229,6 +243,7 @@ class OBS(QWidget):
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.login_button)
         top_layout.addWidget(self.draw_button)
+        top_layout.addWidget(self.checkin_button)
         top_layout.addStretch()
         top_layout.addWidget(QLabel("OBS直播推流界面"))
         top_layout.addStretch()
@@ -308,7 +323,7 @@ class OBS(QWidget):
                 break
     def on_stop_button_clicked(self):
         self.start_stop_button.setText("开始")
-        self.player.stop()
+        if self.player != None: self.player.stop()
         self.player = None
         self.timer = None
         self.chat_edit.clear()
@@ -383,6 +398,88 @@ class OBS(QWidget):
         window = MainWindow()
         window.Show()
         app.MainLoop()
+        dialog = QDialog()
+        dialog.setWindowTitle("签到设置")
+        dialog.setFixedSize(700, 200)
+        form = QFormLayout(dialog)
+        time_edit = QLineEdit()
+        form.addRow("签到时限（分钟）：", time_edit)
+        password_edit = QLineEdit()
+        password_edit.setEchoMode(QLineEdit.Password)
+        form.addRow("签到口令码：", password_edit)
+        type_combo = QComboBox()
+        type_combo.addItem("限时签到")
+        type_combo.addItem("不限时签到")
+        form.addRow("签到类型：", type_combo)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, dialog)
+        button_box.accepted.connect(dialog.accept)
+        button_box.rejected.connect(dialog.reject)
+        form.addRow(button_box)
+        time_edit.setMinimumWidth(200)
+        password_edit.setMinimumWidth(200)
+        type_combo.setMinimumWidth(200)
+        if dialog.exec_() == QDialog.Accepted:
+            time_limit = time_edit.text()
+            password = password_edit.text()
+            chart = QChart()
+            chart.setTitle("签到统计")
+            series = QPieSeries()
+            series.append("已签到", 50)
+            series.append("未签到", 50)
+            chart.addSeries(series)
+            chart.legend().hide()
+            chartview = QChartView(chart)
+            chartview.setRenderHint(QPainter.Antialiasing)
+            chartview.setGeometry(20, 140, 360, 140)
+            dialog.layout().addWidget(chartview)
+            dialog.exec_()
+    def show_checkin_dialog(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("签到设置")
+        dialog.setFixedSize(700, 200)
+        form = QFormLayout(dialog)
+        time_edit = QLineEdit()
+        form.addRow("签到时限（分钟）：", time_edit)
+        password_edit = QLineEdit()
+        password_edit.setEchoMode(QLineEdit.Password)
+        form.addRow("签到口令码：", password_edit)
+        type_combo = QComboBox()
+        type_combo.addItem("限时签到")
+        type_combo.addItem("不限时签到")
+        form.addRow("签到类型：", type_combo)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, dialog)
+        button_box.accepted.connect(dialog.accept)
+        button_box.rejected.connect(dialog.reject)
+        form.addRow(button_box)
+        time_edit.setMinimumWidth(200)
+        password_edit.setMinimumWidth(200)
+        type_combo.setMinimumWidth(200)
+        if dialog.exec_() == QDialog.Accepted:
+            time_limit = time_edit.text()
+            password = password_edit.text()
+            self.show_chart_dialog()
+    def show_chart_dialog(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("签到统计")
+        dialog.setFixedSize(400, 300)
+        chart = QChart()
+        chart.setTitle("签到统计")
+        series = QPieSeries()
+        series.append("已签到", 50)
+        series.append("未签到", 50)
+        chart.addSeries(series)
+        chart.legend().hide()
+        chartview = QChartView(chart, dialog)
+        chartview.setRenderHint(QPainter.Antialiasing)
+        chartview.setGeometry(20, 20, 360, 260)
+        dialog.exec_()
+        self.chart_dialog = dialog 
+    def on_checkin_button_clicked(self):
+        if self.chart_dialog is not None:
+            self.chart_dialog.show()
+        else:
+            self.show_checkin_dialog()
+
         
 
 if __name__ == '__main__':

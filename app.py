@@ -42,7 +42,6 @@ blueprint_list = [
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)
 
-
 if __name__ == '__main__':
     IP = '127.0.0.1' if 1 else '10.70.111.104'
     # app.run(host=IP, port=8000)
