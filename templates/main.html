@@ -42,7 +42,14 @@
             <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
              src="{{ url_for('static', filename='images/blog.jpg') }}">
             <div class="card-body">
-                <span>屏幕分享</span>
+                <span>白板</span>
+            </div>
+        </div>
+        <div class="card video-list" id="renmark">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+             src="{{ url_for('static', filename='images/blog.jpg') }}">
+            <div class="card-body">
+                <span>连麦</span>
             </div>
         </div>
     </div>
@@ -68,6 +75,9 @@
         });
         $("#screenShare").click(function () {
             location.href = "/screenShare/";
+        });
+        $("#renmark").click(function () {
+            location.href = "/renmark/";
         });
     });
 </script>
