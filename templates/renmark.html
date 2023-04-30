@@ -26,6 +26,7 @@
         </ol>
     </nav>
     <div>
+        <audio id="my-audio" src="" controls></audio>
         <canvas id="canvas" style="width:100%; height:100%; object-fit: fill"></canvas>
     </div>
     <div class="row" style="margin-top: 12px;">
@@ -76,84 +77,141 @@
 {% endblock %}
 
 {% block foot %}
+<script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 <script>
-    let audioCtx = null; // 音频上下文
-    let source = null; // 音频源
-    let audioStream = null; // 录音产生的音频流
-    let analyserNode = null; // 用于分析音频实时数据的节点
-    let animationFrame = null; // 定时器
-    function recordSound() {
-        navigator.mediaDevices
-            .getUserMedia({ 'audio': true })
-            .then(initAudioData)
-            .catch(e => {
-                console.log('出问题了，沙雕:', e);
-            });
-    }
-    // 停止录制
-    function stopRecord() {
-        // 关闭麦克风
-        const tracks = audioStream.getAudioTracks();
-        for (let i = 0, len = tracks.length; i < len; i++) {
-            tracks[i].stop();
-        }
-        // 断开音频节点
-        analyserNode.disconnect();
-        source.disconnect();
-        analyserNode = null;
-        source = null;
-        // 清除定时器
-        clearInterval(animationFrame);
-    }
-    // 事件绑定
+    var transports = ["websocket"];
+    conn = new SockJS('http://127.0.0.1:8000/audio', transports);
+    conn.onopen = function () {
+        console.log("音频连接！");
+    };
+    conn.onmessage = function (event) {
+        console.log(event);
+        var audio_url = document.getElementById('my-audio');
+        audio_url.src = event.data;
+        audio_url.addEventListener('canplaythrough', function () {
+            audio_url.play();
+        });
+    };
     document.querySelector('#record').onclick = recordSound;
     document.querySelector('#stop').onclick = stopRecord;
-    // 音频数据处理
-    function initAudioData(stream) {
-        audioStream = stream;
-        // 创建音频上下文
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        // 创建音频源
-        source = audioCtx.createMediaStreamSource(audioStream);
-        // source.connect(audioCtx.destination);
-        analyserNode = audioCtx.createAnalyser();
-        // fftSize决定了能够获取到的音频数据的数量
-        analyserNode.fftSize = 4096;
-        // 音频源连接至analyserNode
-        source.connect(analyserNode);
-        // analyserNode再连接至扬声器播放
-        analyserNode.connect(audioCtx.destination);
-        // 简单用定时器来绘制波形图，当然也可以用requestAnimationFrame来以屏幕刷新的评率来反复执行绘制函数
-        animateFrame = setInterval(drawWaver, 60);
+    var mediaConstraints = {
+        audio: true
+    };
+    function recordSound() {
+        navigator.mediaDevices
+            .getUserMedia(mediaConstraints)
+            .then(onMediaSuccess)
+            .catch(onMediaError);
     }
-    // 绘制图形
-    function drawWaver() {
-        const originData = new Float32Array(analyserNode.fftSize);
-        const positives = [];
-        const negatives = [];
-        // 获取当前的实时音频数据
-        analyserNode.getFloatTimeDomainData(originData);
-        // 每12位数据取一个最大值一个最小值 4096 / 12 = 341.3333
-        for (let i = 0; i < 341; i++) {
-            let temp = originData.slice(i * 12, (i + 1) * 12);
-            positives.push(Math.max.apply(null, temp));
-            negatives.push(Math.min.apply(null, temp));
-        }
-        // 创建canvas上下文
-        let canvas = document.querySelector('#canvas');
-        if (canvas.getContext) {
-            let ctx = canvas.getContext('2d');
-            canvas.width = positives.length * 4;
-            let x = 0;
-            let y = 100;
-            ctx.fillStyle = '#fa541c';
-            // canvas高度200，横坐标在canvas中点100px的位置，横坐标上方绘制正数据，下方绘制负数据
-            for (let k = 0; k < positives.length; k++) {
-                // 每个矩形宽3px，间隔1px，图形总长度即为 length * 4
-                ctx.fillRect(x + 4 * k, y - (100 * positives[k]), 3, 100 * positives[k]);
-                ctx.fillRect(x + 4 * k, 100, 3, 100 * Math.abs(negatives[k]));
-            }
-        }
+    function onMediaSuccess(stream) {
+        var mediaRecorder = new MediaStreamRecorder(stream);
+        mediaRecorder.mimeType = 'audio/wav';
+        mediaRecorder.ondataavailable = function (blob) {
+            var blobURL = URL.createObjectURL(blob);
+            conn.send(blobURL);
+        };
+        mediaRecorder.start(4000);
     }
+    function onMediaError(e) {
+        console.error('media error', e);
+    }
+    function stopRecord() {
+        console.log('stop');
+    }
+</script>
+<script>
+    // let audioCtx = null; // 音频上下文
+    // let source = null; // 音频源
+    // let audioStream = null; // 录音产生的音频流
+    // let analyserNode = null; // 用于分析音频实时数据的节点
+    // let animationFrame = null; // 定时器
+    // function recordSound() {
+    //     navigator.mediaDevices
+    //         .getUserMedia({ 'audio': true })
+    //         .then(initAudioData)
+    //         .catch(e => {
+    //             console.log('出问题了，沙雕:', e);
+    //         });
+    // }
+    // // 停止录制
+    // function stopRecord() {
+    //     // 关闭麦克风
+    //     const tracks = audioStream.getAudioTracks();
+    //     for (let i = 0, len = tracks.length; i < len; i++) {
+    //         tracks[i].stop();
+    //     }
+    //     // 断开音频节点
+    //     analyserNode.disconnect();
+    //     source.disconnect();
+    //     analyserNode = null;
+    //     source = null;
+    //     // 清除定时器
+    //     clearInterval(animationFrame);
+    // }
+    // // 事件绑定
+    // document.querySelector('#record').onclick = recordSound;
+    // document.querySelector('#stop').onclick = stopRecord;
+    // // 音频数据处理
+    // function initAudioData(stream) {
+    //     audioStream = stream;
+    //     // 创建音频上下文
+    //     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    //     // 创建音频源
+    //     source = audioCtx.createMediaStreamSource(audioStream);
+    //     const ws = new WebSocket('ws://127.0.0.1:8000/audio');
+    //     // 发送音频数据到服务器
+    //     source.onaudioprocess = function (event) {
+    //         const audioData = event.inputBuffer.getChannelData(0);
+    //         ws.send(audioData);
+    //     }
+    //     ws.onmessage = function (event) {
+    //         console.log(event.data)
+    //     }
+    //     ws.onopen = function () {
+    //         console.log("start connection")
+    //     }
+    //     ws.onclose = function (e) {
+    //         console.log("connection closed (" + e.code + ")");
+    //     }
+    //     // source.connect(audioCtx.destination);
+    //     // analyserNode = audioCtx.createAnalyser();
+    //     // // fftSize决定了能够获取到的音频数据的数量
+    //     // analyserNode.fftSize = 4096;
+    //     // // 音频源连接至analyserNode
+    //     // source.connect(analyserNode);
+    //     // // analyserNode再连接至扬声器播放
+    //     // analyserNode.connect(audioCtx.destination);
+    //     // // 简单用定时器来绘制波形图，当然也可以用requestAnimationFrame来以屏幕刷新的评率来反复执行绘制函数
+    //     // animateFrame = setInterval(drawWaver, 60);
+    // }
+    // // 绘制图形
+    // function drawWaver() {
+    //     const originData = new Float32Array(analyserNode.fftSize);
+    //     const positives = [];
+    //     const negatives = [];
+    //     // 获取当前的实时音频数据
+    //     analyserNode.getFloatTimeDomainData(originData);
+    //     // 每12位数据取一个最大值一个最小值 4096 / 12 = 341.3333
+    //     for (let i = 0; i < 341; i++) {
+    //         let temp = originData.slice(i * 12, (i + 1) * 12);
+    //         positives.push(Math.max.apply(null, temp));
+    //         negatives.push(Math.min.apply(null, temp));
+    //     }
+    //     // 创建canvas上下文
+    //     let canvas = document.querySelector('#canvas');
+    //     if (canvas.getContext) {
+    //         let ctx = canvas.getContext('2d');
+    //         canvas.width = positives.length * 4;
+    //         let x = 0;
+    //         let y = 100;
+    //         ctx.fillStyle = '#fa541c';
+    //         // canvas高度200，横坐标在canvas中点100px的位置，横坐标上方绘制正数据，下方绘制负数据
+    //         for (let k = 0; k < positives.length; k++) {
+    //             // 每个矩形宽3px，间隔1px，图形总长度即为 length * 4
+    //             ctx.fillRect(x + 4 * k, y - (100 * positives[k]), 3, 100 * positives[k]);
+    //             ctx.fillRect(x + 4 * k, 100, 3, 100 * Math.abs(negatives[k]));
+    //         }
+    //     }
+    // }
 </script>
 {% endblock %}

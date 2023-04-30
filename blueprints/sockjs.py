@@ -2,6 +2,7 @@ import json
 import datetime
 import numpy as np
 from sockjs.tornado import SockJSConnection
+import tornado
 from model.CRUD import CRUD
 
 
@@ -43,19 +44,19 @@ class CanvasConnection(SockJSConnection):
         self.clients.remove(self)
 
 class AudioHandler(SockJSConnection):
-    clients = set()
+    connections = set()
 
     def on_open(self, info):
-        print("WebSocket opened")
-        self.clients.add(self)
+        self.connections.add(self)
+        print("open")
 
     def on_message(self, message):
-        message = message.encode('utf-8')
+        # 广播音频数据给所有其他客户端
         print(message, type(message))
-        for client in self.clients:
-            if client != self:
-                client.send(message)
+        for conn in self.connections:
+            if conn != self:
+                conn.send(message)
 
     def on_close(self):
-        print("WebSocket closed")
-        self.clients.remove(self)
+        self.connections.remove(self)
+        print("close")
