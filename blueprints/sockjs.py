@@ -51,8 +51,6 @@ class AudioHandler(SockJSConnection):
         print("open")
 
     def on_message(self, message):
-        # 广播音频数据给所有其他客户端
-        print(message, type(message))
         for conn in self.connections:
             if conn != self:
                 conn.send(message)

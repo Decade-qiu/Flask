@@ -26,7 +26,7 @@
         </ol>
     </nav>
     <div>
-        <audio id="my-audio" src="" controls></audio>
+        <audio id="my-audio" src="" controls autoplay></audio>
         <canvas id="canvas" style="width:100%; height:100%; object-fit: fill"></canvas>
     </div>
     <div class="row" style="margin-top: 12px;">
@@ -82,7 +82,7 @@
     var transports = ["websocket"];
     conn = new SockJS('http://127.0.0.1:8000/audio', transports);
     conn.onopen = function () {
-        console.log("音频连接！");
+        console.log("音频服务器连接！");
     };
     conn.onmessage = function (event) {
         console.log(event);
@@ -94,17 +94,23 @@
     };
     document.querySelector('#record').onclick = recordSound;
     document.querySelector('#stop').onclick = stopRecord;
+    var mediaRecorder = null;
     var mediaConstraints = {
         audio: true
     };
     function recordSound() {
+        console.log("开始录制音频！");
         navigator.mediaDevices
             .getUserMedia(mediaConstraints)
             .then(onMediaSuccess)
             .catch(onMediaError);
     }
+    function stopRecord() {
+        if (mediaRecorder != null) mediaRecorder.stop();
+        console.log('停止录制音频！');
+    }
     function onMediaSuccess(stream) {
-        var mediaRecorder = new MediaStreamRecorder(stream);
+        mediaRecorder = new MediaStreamRecorder(stream);
         mediaRecorder.mimeType = 'audio/wav';
         mediaRecorder.ondataavailable = function (blob) {
             var blobURL = URL.createObjectURL(blob);
@@ -114,9 +120,6 @@
     }
     function onMediaError(e) {
         console.error('media error', e);
-    }
-    function stopRecord() {
-        console.log('stop');
     }
 </script>
 <script>
