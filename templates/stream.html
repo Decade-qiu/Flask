@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
 <script src="https://cdn.bootcss.com/flv.js/1.4.0/flv.min.js"></script>
 <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+<script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 {% endblock %}
 
 {% block content %}
@@ -29,6 +30,17 @@
             <li class="breadcrumb-item active" aria-current="page"
             id="whiteboard">
                 <button>白板</button>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <li id="record" style="display: inline-block;">
+                    <button>连麦</button>
+                  </li>
+                  <li id="stop" style="display: inline-block;">
+                    <button>关麦</button>
+                  </li>
+            </li>
+            <li style="display: none;">
+                <audio id="my-audio" src="" controls autoplay></audio>
             </li>
         </ol>
     </nav>
@@ -116,9 +128,54 @@
         play("http://127.0.0.1:80/live?port=1935&app=myapp&stream=STREAM_NAME");
     });
     $("#whiteboard").click(function (){
-        // 跳转到白板页面
-        window.location.href = "/screenShare/";
+        // 在新浏览器窗口中打开白板页面
+        window.open("/screenShare/", "_blank");
     });
+</script>
+<script>
+    var transports = ["websocket"];
+    conn = new SockJS('http://127.0.0.1:8000/audio', transports);
+    conn.onopen = function () {
+        console.log("音频服务器连接！");
+    };
+    conn.onmessage = function (event) {
+        console.log(event);
+        var audio_url = document.getElementById('my-audio');
+        audio_url.src = event.data;
+        audio_url.addEventListener('canplaythrough', function () {
+            audio_url.play();
+        });
+    };
+    document.querySelector('#record').onclick = recordSound;
+    document.querySelector('#stop').onclick = stopRecord;
+    var mediaRecorder = null;
+    console.log("adasdaas"+mediaRecorder);
+    var mediaConstraints = {
+        audio: true
+    };
+    function recordSound() {
+        console.log("开始录制音频！");
+        navigator.mediaDevices
+            .getUserMedia(mediaConstraints)
+            .then(onMediaSuccess)
+            .catch(onMediaError);
+    }
+    function stopRecord() {
+        if (mediaRecorder != null) mediaRecorder.stop();
+        console.log('停止录制音频！');
+    }
+    function onMediaSuccess(stream) {
+        mediaRecorder = new MediaStreamRecorder(stream);
+        mediaRecorder.mimeType = 'audio/wav';
+        mediaRecorder.ondataavailable = function (blob) {
+            var blobURL = URL.createObjectURL(blob);
+            conn.send(blobURL);
+        };
+        mediaRecorder.start(4000);
+    }
+    function onMediaError(e) {
+        console.error('media error', e);
+    }
 </script>
 <script src="{{ url_for('static',filename='js/chat.js') }}"></script>
 {% endblock %}
