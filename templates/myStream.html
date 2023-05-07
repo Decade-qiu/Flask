@@ -68,10 +68,7 @@
                 dataType: "json",
                 type: "POST",
                 success: function (res) {
-                    console.log("/stream/?"+"app="+res['app']+
-                                           "&"+"name="+res['name']+
-                                           "&"+"id="+locstream);
-                    location.href = "/stream/?"+"app="+res['app']+"&"+"name="+res['name']+"&id="+locstream;
+                    location.href = "/stream/?"+"app=myapp"+"&"+"name="+res['name']+"&id="+locstream;
                 },
                 error: function (res) {
                     console.log(res);

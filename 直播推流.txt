@@ -15,7 +15,9 @@ redis-server.exe redis.windows.conf
 
 python -u "e:\DeskTop\flask\app.py"
 
-ffmpeg -f dshow -i video='Integrated Camera' -f dshow -i audio='@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4AEC28D7-6B71-40EA-9CE2-8BED96C1541C}'-vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv rtmp://127.0.0.1:1935/myapp/video   
+ffmpeg -list_devices true -f dshow -i dummy
+
+ffmpeg -f dshow -i video='Integrated Camera' -f dshow -i audio='@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4AEC28D7-6B71-40EA-9CE2-8BED96C1541C}' -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv rtmp://127.0.0.1:1935/myapp/video   
 
 pyinstaller --hidden-import=requests E:\DeskTop\flask\OBS\Main.py
 

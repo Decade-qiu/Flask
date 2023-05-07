@@ -122,10 +122,10 @@
         player.play();
     }
     $("#zhibo").click(function (){
-        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream=video");
+        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream="+"{{ data['name'] }}");
     });
     $("#pmfx").click(function (){
-        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream=STREAM_NAME");
+        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream="+"{{ data['name'] }}");
     });
     $("#whiteboard").click(function (){
         // 在新浏览器窗口中打开白板页面

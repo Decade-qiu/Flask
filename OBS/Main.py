@@ -5,7 +5,6 @@ import signal
 import subprocess
 import sys
 import threading
-
 import psutil
 import wx
 import wx.html2 as html2
@@ -222,6 +221,7 @@ class OBS(QWidget):
         self.stream_settings_box = QVBoxLayout()
         self.stream_url_edit = QLineEdit()
         self.stream_url_edit.setPlaceholderText("推流应用名称")
+        self.stream_url_edit.setText("myapp")
         self.stream_settings_box.addWidget(self.stream_url_edit)
         self.stream_key_edit = QLineEdit()
         self.stream_key_edit.setPlaceholderText("推流密钥")
@@ -349,8 +349,8 @@ class OBS(QWidget):
         connect = ORM.db()
         try:
             stream = Stream(
-                title=stream_url,
-                url="http://127.0.0.1:80/live?port=1935&app="+stream_url+"&stream="+stream_key,
+                title=stream_key,
+                url='rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key,
                 createdAt=dt(),
                 userid="decade"
             )
@@ -360,13 +360,13 @@ class OBS(QWidget):
             QMessageBox.information(self, "ERROR", "创建失败！")
         else:
             connect.commit()
-            QMessageBox.information(self, "Sucess", "你的推流地址为\n"+"http://127.0.0.1:80/live?port=1935&app="+stream_url+"&stream="+stream_key)
+            QMessageBox.information(self, "Sucess", "你的推流地址为\n"+'rtmp://127.0.0.1:1935/myapp/'+stream_key)
         finally:
             connect.close()
-        self.url = r'ffmpeg -f dshow -i video="@device_pnp_\\?\usb#vid_04f2&pid_b67c&mi_00#6&26fcf372&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global" -f dshow -i audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4AEC28D7-6B71-40EA-9CE2-8BED96C1541C}" -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
+        self.url = r'ffmpeg -f dshow -i video="@device_pnp_\\?\usb#vid_04f2&pid_b67c&mi_00#6&26fcf372&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global" -f dshow -i audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4D3E6045-E4F5-48E3-9474-54421A73A77B}" -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/myapp/'+stream_key
         print("********正在推流!********")
         if self.stream_source_combo.currentText() != "摄像头":
-            self.url = r'ffmpeg -f gdigrab -i desktop -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key
+            self.url = r'ffmpeg -f gdigrab -i desktop -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/myapp/'+stream_key
         self.th = threading.Thread(target=self.Display)
         self.th.start()
         stream_url = "rtmp://127.0.0.1:1935/"+stream_url+"/"+stream_key

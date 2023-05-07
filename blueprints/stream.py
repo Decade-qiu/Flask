@@ -20,18 +20,16 @@ def stream():
         data = dict(
             title="Stream"
         )
-        app = request.args.get('app', '')
         name = request.args.get('name', '')
-        streamid = request.args.get('id', '')
-        data['app'] = app
+        streamid = request.args.get ('id', '')
         data['name'] = name
         data['streamid'] = streamid
         return render_template("stream.html", data=data)
     else:
         rtmp_url = request.form.get('url', "") + "/a/a/a/a"
         rtmp, myapp, name = rtmp_url[7:].split('/')[0:3]
+        print(rtmp_url, rtmp, myapp, name)
         res = dict(
-            app=myapp,
             name=name
         )
         return res
