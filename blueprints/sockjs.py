@@ -36,6 +36,7 @@ class CanvasConnection(SockJSConnection):
         self.clients.remove(self)
 
 class AudioHandler(SockJSConnection):   
+
     connections = set()
 
     def on_open(self, info):
@@ -50,3 +51,20 @@ class AudioHandler(SockJSConnection):
     def on_close(self):
         self.connections.remove(self)
         print("close")
+
+class checkHandler(SockJSConnection):   
+
+    connections = set()
+
+    def on_open(self, info):
+        self.connections.add(self)
+        print("open!!")
+
+    def on_message(self, message):
+        for conn in self.connections:
+            if conn != self:
+                conn.send(message)
+
+    def on_close(self):
+        self.connections.remove(self)
+        print("close!!")

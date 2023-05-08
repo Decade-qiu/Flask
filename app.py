@@ -1,11 +1,15 @@
-from blueprints.sockjs import ChatRoomHandler,CanvasConnection as BoardHandler, AudioHandler
+import datetime
+from blueprints.conn import bp as conn
+from blueprints.sockjs import ChatRoomHandler,CanvasConnection as BoardHandler, AudioHandler, checkHandler
 import tornado.ioloop
 import tornado.web
 from tornado.web import Application, FallbackHandler
 from tornado.wsgi import WSGIContainer
 import sockjs.tornado
+import sockjs
 import config
 from flask import Flask, session, g, request, redirect, render_template, url_for
+from flask_sockets import Sockets
 from blueprints.screen import bp as screen
 from blueprints.dm import bp as dm
 from blueprints.course import bp as course
@@ -37,10 +41,12 @@ app.debug=True
 blueprint_list = [
     main, regist, login, userprofile, logout, upload, playchat,
     build, myStream, stream, msg, index, course, dm, test, service,
-    hhelp, screen, renmark
+    hhelp, screen, renmark, conn
 ]
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)
+
+
 
 if __name__ == '__main__':
     IP = '127.0.0.1' if 1 else '10.70.43.81'
@@ -48,9 +54,10 @@ if __name__ == '__main__':
     ChatRouter = sockjs.tornado.SockJSRouter(ChatRoomHandler, '/chatroom')
     BoardRouter = sockjs.tornado.SockJSRouter(BoardHandler, '/board')
     AudioRouter = sockjs.tornado.SockJSRouter(AudioHandler, '/audio')
+    checkRouter = sockjs.tornado.SockJSRouter(checkHandler, '/check')
     wsgi_app = WSGIContainer(app)
     application = tornado.web.Application(
-        ChatRouter.urls + BoardRouter.urls + AudioRouter.urls + [(r'.*', FallbackHandler, dict(fallback=wsgi_app))]
+        ChatRouter.urls + BoardRouter.urls + AudioRouter.urls + checkRouter.urls +[(r'.*', FallbackHandler, dict(fallback=wsgi_app))]
     )
     application.listen(8000, address=IP)
     tornado.ioloop.IOLoop.instance().start()

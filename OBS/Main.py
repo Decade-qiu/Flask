@@ -36,6 +36,11 @@ class Stream(Base):
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     userid = Column(VARCHAR(20), nullable=True)
     # updatedAt = Column(DATETIME, nullable=False)  # 修改时间
+class Check(Base):
+    __tablename__ = "check"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    key = Column(INTEGER, nullable=False, unique=True)  
+    name = Column(VARCHAR(20), nullable=False, unique=True) 
 class User(Base):
     __tablename__ = "user"
     id = Column(INTEGER, primary_key=True)  # 编号
@@ -198,6 +203,7 @@ class OBS(QWidget):
         self.player = None
         self.p = None
         self.chart_dialog = None
+        self.key = 1
         # 设置窗口标题和大小
         self.setWindowTitle("OBS直播推流界面")
         self.resize(800*2.3, 600*2.3)
@@ -212,6 +218,9 @@ class OBS(QWidget):
         # 创建签到按钮并连接槽函数
         self.checkin_button = QPushButton("签到")
         self.checkin_button.clicked.connect(self.on_checkin_button_clicked)
+        # 创建在人数按钮并连接槽函数
+        self.online_button = QPushButton("在线学生")
+        self.online_button.clicked.connect(self.on_online_button_clicked)
         # 创建视频预览区域
         self.preview_label = QLabel("视频预览区域")
         self.preview_label.setAlignment(Qt.AlignCenter)
@@ -244,6 +253,7 @@ class OBS(QWidget):
         top_layout.addWidget(self.login_button)
         top_layout.addWidget(self.draw_button)
         top_layout.addWidget(self.checkin_button)
+        top_layout.addWidget(self.online_button)
         top_layout.addStretch()
         top_layout.addWidget(QLabel("OBS直播推流界面"))
         top_layout.addStretch()
@@ -360,7 +370,8 @@ class OBS(QWidget):
             QMessageBox.information(self, "ERROR", "创建失败！")
         else:
             connect.commit()
-            QMessageBox.information(self, "Sucess", "你的推流地址为\n"+'rtmp://127.0.0.1:1935/myapp/'+stream_key)
+            self.key = connect.query(Stream).filter(Stream.title == stream_key).order_by(Stream.createdAt.desc()).first().id
+            QMessageBox.information(self, "Sucess", "你的推流地址为\n"+'rtmp://127.0.0.1:1935/myapp/'+stream_key+" id ="+str(self.key))
         finally:
             connect.close()
         self.url = r'ffmpeg -f dshow -i video="@device_pnp_\\?\usb#vid_04f2&pid_b67c&mi_00#6&26fcf372&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global" -f dshow -i audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4D3E6045-E4F5-48E3-9474-54421A73A77B}" -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/myapp/'+stream_key
@@ -398,41 +409,6 @@ class OBS(QWidget):
         window = MainWindow()
         window.Show()
         app.MainLoop()
-        dialog = QDialog()
-        dialog.setWindowTitle("签到设置")
-        dialog.setFixedSize(700, 200)
-        form = QFormLayout(dialog)
-        time_edit = QLineEdit()
-        form.addRow("签到时限（分钟）：", time_edit)
-        password_edit = QLineEdit()
-        password_edit.setEchoMode(QLineEdit.Password)
-        form.addRow("签到口令码：", password_edit)
-        type_combo = QComboBox()
-        type_combo.addItem("限时签到")
-        type_combo.addItem("不限时签到")
-        form.addRow("签到类型：", type_combo)
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, dialog)
-        button_box.accepted.connect(dialog.accept)
-        button_box.rejected.connect(dialog.reject)
-        form.addRow(button_box)
-        time_edit.setMinimumWidth(200)
-        password_edit.setMinimumWidth(200)
-        type_combo.setMinimumWidth(200)
-        if dialog.exec_() == QDialog.Accepted:
-            time_limit = time_edit.text()
-            password = password_edit.text()
-            chart = QChart()
-            chart.setTitle("签到统计")
-            series = QPieSeries()
-            series.append("已签到", 50)
-            series.append("未签到", 50)
-            chart.addSeries(series)
-            chart.legend().hide()
-            chartview = QChartView(chart)
-            chartview.setRenderHint(QPainter.Antialiasing)
-            chartview.setGeometry(20, 140, 360, 140)
-            dialog.layout().addWidget(chartview)
-            dialog.exec_()
     def show_checkin_dialog(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("签到设置")
@@ -479,8 +455,52 @@ class OBS(QWidget):
             self.chart_dialog.show()
         else:
             self.show_checkin_dialog()
-
+    def on_online_button_clicked(self):
+        # 获取当前在线学生的人数和昵称
+        online_students = ["小明", "小红", "小刚", "小张", "小李", "小王", "小赵", "小钱", "小周", "小吴", "小郑", "小孙", "小陈", "小崔", "小段"]
+        online_status = [True, False, True, True, False, True, True, True, False, False, False, True, False, True, False]
+        session = ORM.db()
+        persons = session.query(Check).filter(Check.key == self.key).all()
+        session.close()
+        for person in persons:
+            if person.name not in online_students:
+                online_students.append(person.name)
+                online_status.append(True)
+        # 创建多行文本框和滚动区域
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        student_layouts = []
+        for student, status in sorted(zip(online_students, online_status), key=lambda x: x[1], reverse=True):
+            student_label = QLabel(student)
+            font = QFont()
+            font.setPointSize(25)  # 设置学生姓名的字体大小
+            student_label.setFont(font)
+            # student_label.setFixedSize(80, 80)  # 调整学生姓名的大小
+            online_label = QLabel()
+            online_label.setFixedSize(50, 50)  # 调整旁边圆圈的大小
+            online_pixmap = QPixmap(25, 25)
+            online_pixmap.fill(QColor("green" if status else "red"))
+            painter = QPainter(online_pixmap)
+            painter.setBrush(QBrush(QColor("white")))
+            painter.drawEllipse(2, 2, 12, 12)
+            painter.end()
+            online_label.setPixmap(online_pixmap)
+            student_layout = QHBoxLayout()
+            student_layout.addWidget(student_label)
+            student_layout.addWidget(online_label)
+            student_layouts.append(student_layout)
+        students_layout = QVBoxLayout()
+        for student_layout in student_layouts:
+            students_layout.addLayout(student_layout)
+        layout.addLayout(students_layout)
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidget(widget)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setFixedSize(400, 500)
+        # 显示多行文本框和滚动区域
+        self.scroll_area.show()
         
+            
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -1,14 +1,18 @@
-from flask import Flask
-from flask_socketio import SocketIO, emit
+from PyQt5.QtCore import QUrl
+from PyQt5.QtWebSockets import QWebSocket
 
-app = Flask(__name__)
-socketio = SocketIO(app)
+def onConnected():
+    socket.sendTextMessage("Hello, world!")
+    print("aa")
 
-# 处理客户端发送的音频数据
-@socketio.on('audio_data')
-def handle_audio_data(audio_data):
-  # 广播音频数据给所有其他客户端
-  emit('audio_data', audio_data, broadcast=True)
+def onTextMessageReceived(message):
+    print("Message received:", message)
 
-if __name__ == '__main__':
-  socketio.run(app)
+url = QUrl("ws://127.0.0.1:8000/check")
+socket = QWebSocket()
+socket.open(url)
+print(socket.isValid())
+socket.connected.connect(onConnected)
+socket.sendTextMessage("Hello, world!")
+socket.textMessageReceived.connect(onTextMessageReceived)
+socket.close()

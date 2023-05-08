@@ -32,6 +32,11 @@ class Msg(Base):
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     updatedAt = Column(DATETIME, nullable=False)  # 修改时间
 
+class Check(Base):
+    __tablename__ = "check"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    key = Column(INTEGER, nullable=False, unique=True)  
+    name = Column(VARCHAR(20), nullable=False, unique=True) 
 
 class User(Base):
     __tablename__ = "user"

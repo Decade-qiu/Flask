@@ -1,4 +1,3 @@
-
 {% extends "layout.html" %}
 
 {% block head %}
@@ -19,25 +18,25 @@
 <div class="col-md-10 pad-right">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page"
-            id="zhibo">
+            <li class="breadcrumb-item active" aria-current="page" id="zhibo">
                 <button>直播页面</button>
             </li>
-            <li class="breadcrumb-item active" aria-current="page"
-            id="pmfx">
+            <li class="breadcrumb-item active" aria-current="page" id="pmfx">
                 <button>屏幕分享</button>
             </li>
-            <li class="breadcrumb-item active" aria-current="page"
-            id="whiteboard">
+            <li class="breadcrumb-item active" aria-current="page" id="whiteboard">
                 <button>白板</button>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page" id="check">
+                <button>签到</button>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
                 <li id="record" style="display: inline-block;">
                     <button>连麦</button>
-                  </li>
-                  <li id="stop" style="display: inline-block;">
+                </li>
+                <li id="stop" style="display: inline-block;">
                     <button>关麦</button>
-                  </li>
+                </li>
             </li>
             <li style="display: none;">
                 <audio id="my-audio" src="" controls autoplay></audio>
@@ -60,34 +59,33 @@
                 <div class="card-body">
                     <form id="form-data">
                         <div class="media">
-                            <input type="hidden" name="streamid" id="input_id"
-                                       value="{{ data['streamid'] }}">
+                            <input type="hidden" name="streamid" id="input_id" value="{{ data['streamid'] }}">
                             {% if session.get('name', '') %}
                             <img class="mr-3"
-                                 src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
-                                 style="width: 60px;height: 60px;">
+                                src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
+                                style="width: 60px;height: 60px;">
                             {% else %}
                             <img class="mr-3" src="{{ url_for('static', filename='images/male.png') }}"
-                                 style="width: 60px;height: 60px;">
+                                style="width: 60px;height: 60px;">
                             {% endif %}
                             <div class="media-body">
-                                <h6>{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客 <a href="/login/">[登录]</a> <a
-                                        href="/regist/">[注册]</a>{% endif %}</h6>
+                                <h6>{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客 <a
+                                        href="/login/">[登录]</a> <a href="/regist/">[注册]</a>{% endif %}</h6>
                                 <textarea name="content" id="editor" style="width: 100%;"></textarea>
                                 <input type="hidden" name="name" id="input_name"
-                                       value="{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客{% endif %}">
+                                    value="{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客{% endif %}">
                                 {% if session.get('name', '') %}
                                 <input type="hidden" name="face" id="input_face"
-                                       value="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}">
+                                    value="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}">
                                 {% else %}
                                 <input type="hidden" name="face" id="input_face"
-                                       value="{{ url_for('static', filename='images/male.png') }}">
+                                    value="{{ url_for('static', filename='images/male.png') }}">
                                 {% endif %}
                             </div>
                         </div>
                     </form>
                     <a style="margin-top: 12px;" id="send_msg" class="btn btn-success float-right"
-                       href="javascript:void(0)">发送消息</a>
+                        href="javascript:void(0)">发送消息</a>
                 </div>
             </div>
         </div>
@@ -104,7 +102,7 @@
     });
     // "http://127.0.0.1:80/live?port=1935&app="+'{{ data["app"] }}'+'&stream='+'{{ data["name"] }}'
     var player = null;
-    var play = function(uurl){
+    var play = function (uurl) {
         var videoElement = document.getElementById('videoElement');
         if (player != null) {
             player.pause();
@@ -121,15 +119,26 @@
         player.load();
         player.play();
     }
-    $("#zhibo").click(function (){
-        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream="+"{{ data['name'] }}");
+    $("#zhibo").click(function () {
+        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream=" + "{{ data['name'] }}");
     });
-    $("#pmfx").click(function (){
-        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream="+"{{ data['name'] }}");
+    $("#pmfx").click(function () {
+        play("http://127.0.0.1:80/live?port=1935&app=myapp&stream=" + "{{ data['name'] }}");
     });
-    $("#whiteboard").click(function (){
+    $("#whiteboard").click(function () {
         // 在新浏览器窗口中打开白板页面
         window.open("/screenShare/", "_blank");
+    });
+    $("#check").click(function () {
+        $.ajax({
+            url: "/conn/",
+            type: "POST",
+            data: { streamid: $("#input_id").val(), name: $("#input_name").val()},
+            dataType: "json",
+            success: function (res) {
+                alert(res['code']);
+            }
+        });
     });
 </script>
 <script>
@@ -149,7 +158,7 @@
     document.querySelector('#record').onclick = recordSound;
     document.querySelector('#stop').onclick = stopRecord;
     var mediaRecorder = null;
-    console.log("adasdaas"+mediaRecorder);
+    console.log("adasdaas" + mediaRecorder);
     var mediaConstraints = {
         audio: true
     };
