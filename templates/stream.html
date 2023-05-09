@@ -31,12 +31,12 @@
                 <button>签到</button>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
-                <li id="record" style="display: inline-block;">
-                    <button>连麦</button>
-                </li>
-                <li id="stop" style="display: inline-block;">
-                    <button>关麦</button>
-                </li>
+            <li id="record" style="display: inline-block;">
+                <button>连麦</button>
+            </li>
+            <li id="stop" style="display: inline-block;">
+                <button>关麦</button>
+            </li>
             </li>
             <li style="display: none;">
                 <audio id="my-audio" src="" controls autoplay></audio>
@@ -100,7 +100,6 @@
             ['fullscreen', 'emotion', 'insertcode', 'preview']
         ]
     });
-    // "http://127.0.0.1:80/live?port=1935&app="+'{{ data["app"] }}'+'&stream='+'{{ data["name"] }}'
     var player = null;
     var play = function (uurl) {
         var videoElement = document.getElementById('videoElement');
@@ -130,10 +129,16 @@
         window.open("/screenShare/", "_blank");
     });
     $("#check").click(function () {
+        var input = prompt("请输入签到码：");
+        if (input === null) return;
         $.ajax({
             url: "/conn/",
             type: "POST",
-            data: { streamid: $("#input_id").val(), name: $("#input_name").val()},
+            data: {
+                streamid: $("#input_id").val(),
+                name: $("#input_name").val(),
+                pwd: input  // 将用户输入的内容添加到 data 参数中
+            },
             dataType: "json",
             success: function (res) {
                 alert(res['code']);
@@ -163,15 +168,29 @@
         audio: true
     };
     function recordSound() {
-        console.log("开始录制音频！");
-        navigator.mediaDevices
-            .getUserMedia(mediaConstraints)
-            .then(onMediaSuccess)
-            .catch(onMediaError);
+        $.ajax({
+            url: "/mute/",
+            type: "POST",
+            data: {
+                streamid: $("#input_id").val()
+            },
+            dataType: "json",
+            success: function (res) {
+                if (res['code'] == 1){
+                    alert("教师开启了全员静音！")
+                }else{
+                    alert("开麦成功")
+                    navigator.mediaDevices
+                        .getUserMedia(mediaConstraints)
+                        .then(onMediaSuccess)
+                        .catch(onMediaError);
+                }
+            }
+        });
     }
     function stopRecord() {
         if (mediaRecorder != null) mediaRecorder.stop();
-        console.log('停止录制音频！');
+        alert("关麦成功")
     }
     function onMediaSuccess(stream) {
         mediaRecorder = new MediaStreamRecorder(stream);

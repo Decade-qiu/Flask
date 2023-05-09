@@ -22,7 +22,6 @@ class Video(Base):
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     updatedAt = Column(DATETIME, nullable=False)  # 修改时间
 
-
 # 定义聊天数据模型
 class Msg(Base):
     __tablename__ = "msg"
@@ -31,12 +30,6 @@ class Msg(Base):
     streamId = Column(INTEGER)
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     updatedAt = Column(DATETIME, nullable=False)  # 修改时间
-
-class Check(Base):
-    __tablename__ = "check"
-    id = Column(INTEGER, primary_key=True)  # 编号
-    key = Column(INTEGER, nullable=False, unique=True)  
-    name = Column(VARCHAR(20), nullable=False, unique=True) 
 
 class User(Base):
     __tablename__ = "user"
@@ -63,5 +56,14 @@ class Stream(Base):
     url = Column(VARCHAR(255), nullable=False)  #
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     userid = Column(VARCHAR(20), nullable=True)
-    # updatedAt = Column(DATETIME, nullable=False)  # 修改时间
+    cktAt = Column(DATETIME, nullable=False)  # 修改时间
+    pwd = Column(INTEGER, nullable=False)  
+    mute = Column(INTEGER, nullable=False)  # 编号
+
+class Check(Base):
+    __tablename__ = "check"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    key = Column(INTEGER, nullable=False, unique=True)  
+    name = Column(VARCHAR(20), nullable=False, unique=True) 
+    ckt = Column(DATETIME, nullable=False)  # 修改时间
 

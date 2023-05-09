@@ -35,12 +35,15 @@ class Stream(Base):
     url = Column(VARCHAR(255), nullable=False)  #
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     userid = Column(VARCHAR(20), nullable=True)
-    # updatedAt = Column(DATETIME, nullable=False)  # 修改时间
+    cktAt = Column(DATETIME, nullable=False)  # 修改时间
+    pwd = Column(INTEGER, nullable=False)  
+    mute = Column(INTEGER, nullable=False)  # 编号
 class Check(Base):
     __tablename__ = "check"
     id = Column(INTEGER, primary_key=True)  # 编号
     key = Column(INTEGER, nullable=False, unique=True)  
     name = Column(VARCHAR(20), nullable=False, unique=True) 
+    ckt = Column(DATETIME, nullable=False)  # 修改时间
 class User(Base):
     __tablename__ = "user"
     id = Column(INTEGER, primary_key=True)  # 编号
@@ -221,6 +224,9 @@ class OBS(QWidget):
         # 创建在人数按钮并连接槽函数
         self.online_button = QPushButton("在线学生")
         self.online_button.clicked.connect(self.on_online_button_clicked)
+        # 创建全员静音按钮并连接槽函数
+        self.mute_all_button = QPushButton("全员静音")
+        self.mute_all_button.clicked.connect(self.on_mute_all_button_clicked)
         # 创建视频预览区域
         self.preview_label = QLabel("视频预览区域")
         self.preview_label.setAlignment(Qt.AlignCenter)
@@ -254,6 +260,7 @@ class OBS(QWidget):
         top_layout.addWidget(self.draw_button)
         top_layout.addWidget(self.checkin_button)
         top_layout.addWidget(self.online_button)
+        top_layout.addWidget(self.mute_all_button)
         top_layout.addStretch()
         top_layout.addWidget(QLabel("OBS直播推流界面"))
         top_layout.addStretch()
@@ -362,7 +369,8 @@ class OBS(QWidget):
                 title=stream_key,
                 url='rtmp://127.0.0.1:1935/'+stream_url+'/'+stream_key,
                 createdAt=dt(),
-                userid="decade"
+                userid="decade",
+                mute = 0,
             )
             connect.add(stream)
         except Exception as e:
@@ -431,8 +439,14 @@ class OBS(QWidget):
         password_edit.setMinimumWidth(200)
         type_combo.setMinimumWidth(200)
         if dialog.exec_() == QDialog.Accepted:
-            time_limit = time_edit.text()
+            time_limit = int(time_edit.text())
             password = password_edit.text()
+            session = ORM.db()
+            stream = session.query(Stream).filter(Stream.id==self.key).first()
+            stream.cktAt = (datetime.datetime.now()+datetime.timedelta(minutes=time_limit)).strftime("%Y-%m-%d %H:%M:%S")
+            stream.pwd = int(password)
+            session.commit()
+            session.close()
             self.show_chart_dialog()
     def show_chart_dialog(self):
         dialog = QDialog(self)
@@ -499,7 +513,16 @@ class OBS(QWidget):
         self.scroll_area.setFixedSize(400, 500)
         # 显示多行文本框和滚动区域
         self.scroll_area.show()
-        
+    def on_mute_all_button_clicked(self):
+        session = ORM.db()
+        stream = session.query(Stream).filter(Stream.id==self.key).first()
+        stream.mute = 1-stream.mute
+        session.commit()
+        session.close()
+        if self.mute_all_button.text() == "全员静音":
+            self.mute_all_button.setText("全员开启")
+        else:
+            self.mute_all_button.setText("全员静音")
             
 
 if __name__ == '__main__':
