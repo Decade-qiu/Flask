@@ -41,6 +41,7 @@
             <li style="display: none;">
                 <audio id="my-audio" src="" controls autoplay></audio>
             </li>
+            <video id="hidden-video" style="display: none;"></video>
         </ol>
     </nav>
     <div id="dplayer">
@@ -154,18 +155,28 @@
     };
     conn.onmessage = function (event) {
         console.log(event);
-        var audio_url = document.getElementById('my-audio');
-        audio_url.src = event.data;
-        audio_url.addEventListener('canplaythrough', function () {
-            audio_url.play();
-        });
+        // var audio_url = document.getElementById('my-audio');
+        // audio_url.src = event.data;
+        // audio_url.addEventListener('canplaythrough', function () {
+        //     audio_url.play();
+        // });
+        // var video_url = document.getElementById('my-video');
+        // video_url.src = event.data;
+        // video_url.addEventListener('canplaythrough', function () {
+        //     video_url.play();
+        // });
+        openPlayerWindow(event.data);
     };
+    function openPlayerWindow(url) {
+        var playerWindow = window.open('', 'playerWindow', 'width=800,height=600');
+        playerWindow.document.body.innerHTML = '<video src="' + url + '" controls autoplay></video>';
+    }
     document.querySelector('#record').onclick = recordSound;
     document.querySelector('#stop').onclick = stopRecord;
     var mediaRecorder = null;
-    console.log("adasdaas" + mediaRecorder);
     var mediaConstraints = {
-        audio: true
+        audio: true,
+        video: true
     };
     function recordSound() {
         $.ajax({
@@ -194,12 +205,13 @@
     }
     function onMediaSuccess(stream) {
         mediaRecorder = new MediaStreamRecorder(stream);
-        mediaRecorder.mimeType = 'audio/wav';
+        // mediaRecorder.mimeType = 'audio/wav';
+        mediaRecorder.mimeType = 'video/webm;codecs=vp9,opus';
         mediaRecorder.ondataavailable = function (blob) {
             var blobURL = URL.createObjectURL(blob);
             conn.send(blobURL);
         };
-        mediaRecorder.start(4000);
+        mediaRecorder.start(10000);
     }
     function onMediaError(e) {
         console.error('media error', e);

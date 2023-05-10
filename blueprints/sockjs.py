@@ -41,16 +41,17 @@ class AudioHandler(SockJSConnection):
 
     def on_open(self, info):
         self.connections.add(self)
-        print("open")
+        print("open-audio")
 
     def on_message(self, message):
+        print(message)
         for conn in self.connections:
             if conn != self:
                 conn.send(message)
 
     def on_close(self):
         self.connections.remove(self)
-        print("close")
+        print("close-audio")
 
 class checkHandler(SockJSConnection):   
 
