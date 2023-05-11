@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime  # 导入日期时间模块
-from model.models import User, Video, Msg, Stream
+from model.models import Post, User, Video, Msg, Stream
 from tools.orm import ORM
 from werkzeug.security import generate_password_hash  # 生成哈希密码
 import math
@@ -298,6 +298,52 @@ class CRUD:
             else:
                 model = session.query(Video).order_by(Video.createdAt.desc())
             res = CRUD.page(model)
+        except Exception as e:
+            session.rollback()
+        else:
+            session.commit()
+        finally:
+            session.close()
+        return res
+
+    @staticmethod
+    def save_post(data):
+        session = ORM.db()
+        try:
+            post = Post(
+                content=data,
+                createdAt=dt()
+            )
+            session.add(post)
+        except Exception as e:
+            session.rollback()
+            return False
+        else:
+            session.commit()
+            return True
+        finally:
+            session.close()
+
+    @staticmethod
+    def get_posts():
+        session = ORM.db()
+        res = None
+        try:
+            res = session.query(Post).order_by(Post.createdAt.desc())
+        except Exception as e:
+            session.rollback()
+        else:
+            session.commit()
+        finally:
+            session.close()
+        return res
+
+    @staticmethod
+    def get_post(id):
+        session = ORM.db()
+        res = None
+        try:
+            res = session.query(Post).filter_by(id=id).first()
         except Exception as e:
             session.rollback()
         else:

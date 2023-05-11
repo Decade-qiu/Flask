@@ -31,6 +31,13 @@ class Msg(Base):
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     updatedAt = Column(DATETIME, nullable=False)  # 修改时间
 
+class Post(Base):
+    __tablename__ = "post"
+    id = Column(BIGINT, primary_key=True)  # 编号
+    content = Column(TEXT)  # 消息
+    createdAt = Column(DATETIME, nullable=False)  # 创建时间
+    comment = Column(TEXT)  
+
 class User(Base):
     __tablename__ = "user"
     id = Column(INTEGER, primary_key=True)  # 编号

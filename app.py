@@ -1,5 +1,6 @@
 import datetime
 from blueprints.conn import bp as conn
+from blueprints.discuss import bp as discuss
 from blueprints.sockjs import ChatRoomHandler,CanvasConnection as BoardHandler, AudioHandler, checkHandler
 import tornado.ioloop
 import tornado.web
@@ -41,7 +42,7 @@ app.debug=True
 blueprint_list = [
     main, regist, login, userprofile, logout, upload, playchat,
     build, myStream, stream, msg, index, course, dm, test, service,
-    hhelp, screen, renmark, conn
+    hhelp, screen, renmark, conn, discuss
 ]
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)

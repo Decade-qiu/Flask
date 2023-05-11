@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <div class="card">
+        <div class="card-body">
+            <!-- 显示帖子标题 -->
+            <h2 class="card-title">{{ post['title'] }}</h2>
+            <!-- 显示帖子发布信息 -->
+            <p class="card-subtitle mb-2 text-muted">Posted by {{ post['name'] }} on {{ post['dt'] }}</p>
+            <!-- 使用 Marked.js 将 Markdown 转换为 HTML -->
+
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="post-content">{{ post['content'] }}</div>
+        </div>
+    </div>
+    <div id="comments"></div>
+    <script>
+        new Staticman({
+            endpoint: 'https://api.staticman.net/v2/entry/Decade-qiu/comment/main/comments', // API 地址
+            username: 'Decade-qiu',
+            repository: 'comment',
+            branch: 'main',
+            path: 'comments/{options.slug}',
+            id: "{{post['id']}}",               // 页面唯一 ID
+            createdAt: 'created_at' // 创建时间戳
+        }).fetch('POST').then(function (comments) {
+            var commentsEl = document.getElementById('comments');
+            comments.forEach(function (comment) {
+                var commentEl = document.createElement('div');
+                commentEl.innerHTML = '<h4>' + comment.name + '</h4><p>' + comment.message + '</p>';
+                commentsEl.appendChild(commentEl);
+            });
+        });
+    </script>
+</div>
+
+
+{% endblock %}
+
+{% block foot %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/mode/markdown/markdown.min.js"></script>
+<script src="https://cdn.bootcss.com/marked/0.8.1/marked.min.js"></script>
+<script>
+    // 使用 Highlight.js 对代码块进行语法高亮
+    document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightBlock(block);
+    });
+
+    var content = document.querySelector('.post-content').innerHTML;
+    document.querySelector('.post-content').innerHTML = marked(content);
+    // 使用 Font Awesome 添加图标
+    $(document).ready(function () {
+        $('.post-info').append('<a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>');
+        $('.post-info').append('<a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>');
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.t-nav-link').click(function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: $(this).attr('href'),
+                type: 'GET',
+                success: function (response) {
+                    $('#post-list').empty();
+                    $('#post-list').html(response);
+                }
+            });
+            $('.t-nav-link').removeClass('active');
+            $('.t-nav-link span').removeClass('text-white');
+            $(this).addClass('active');
+            $(this).find('span').addClass('text-white');
+        });
+
+        var editor = CodeMirror.fromTextArea(document.getElementById('postContent'), {
+            mode: 'markdown',
+            theme: 'monokai',
+            lineWrapping: true,
+            autofocus: true
+        });
+        function updatePreview() {
+            var preview = document.getElementById('postPreview');
+            preview.innerHTML = marked(editor.getValue());
+        }
+        $('#createPostModal').on('show.bs.modal', function () {
+            $('#postTitle').val('');
+            editor.setValue('');
+            updatePreview();
+        });
+        editor.on('change', function () {
+            updatePreview();
+        });
+        $('#createPostForm').submit(function (event) {
+            event.preventDefault();
+            var title = $('#postTitle').val();
+            var content = editor.getValue();
+            $.ajax({
+                url: '/createPost/',
+                type: 'POST',
+                data: { title: title, content: content },
+                success: function (response) {
+                    alert(response['code']);
+                }
+            });
+        });
+
+        $(".post").click(function () {
+            var postId = $(this).attr('post-id');
+            window.location.href = '/discuss/post/?id=' + postId;
+        });
+    });
+</script>
+<style>
+    .post {
+        margin-bottom: 20px;
+    }
+
+    .create-post-btn {
+        border-radius: 10px;
+        /* 设置圆角半径 */
+        background-color: green;
+        /* 设置背景颜色 */
+        color: white;
+        /* 设置字体颜色 */
+        padding: 10px 20px;
+        /* 设置内边距 */
+        font-size: 16px;
+        /* 设置字体大小 */
+        border: none;
+        /* 去掉边框 */
+        cursor: pointer;
+        /* 设置鼠标指针样式 */
+    }
+
+    .t-nav-link.active {
+        background-color: #CCE5FF;
+    }
+
+    .t-nav-link.active span {
+        text-decoration: underline;
+        color: #007BFF;
+    }
+
+    .post-form {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .post-form .form-group {
+        flex: 1;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}

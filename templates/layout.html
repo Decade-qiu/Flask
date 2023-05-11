@@ -6,6 +6,7 @@
     <!--指定网页支持响应式：电脑和手机自适应-->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{ data['title'] }}</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.min.js"></script>
     <!-- 新 Bootstrap4 核心 CSS 文件 -->
     <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
     <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
@@ -17,6 +18,9 @@
     <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='bw/dist/sketchy/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/theme/monokai.min.css" />
+    <script src="https://unpkg.com/staticman/dist/staticman.js"></script>
     <style>
         #mynavbar {
             background: rgba(32, 92, 152, 0.95);
@@ -34,7 +38,6 @@
             margin: 0 auto;
             position: relative;
         }
-
     </style>
     {% block head %}{% endblock %}
 </head>
@@ -54,7 +57,10 @@
             <li class="nav-item">
                 <a class="nav-link" href="#" style="font-size: 16px;">课程分类</a>
             </li>
-        </ul>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <li class="nav-item">
+                <a class="nav-link" href="/discuss/" style="font-size: 16px;">讨论区</a>
+            </li>
+        </ul>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <div class="input-group col-md-3">
             <input type="text" id="input_q" class="form-control" placeholder="请输入搜索内容！"
                 aria-label="Recipient's username" aria-describedby="basic-addon2" style="border-radius: 15px;">
@@ -64,7 +70,6 @@
                 </button>
             </div>
         </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -129,11 +134,14 @@
                             <button type="button" class="btn btn-info"
                                 onclick="window.location.href='/course/'">课程列表</button>
                             <br>
-                            <button type="button" class="btn btn-info" onclick="window.location.href='/help/'">帮助</button>
+                            <button type="button" class="btn btn-info"
+                                onclick="window.location.href='/help/'">帮助</button>
                             <br>
-                            <button type="button" class="btn btn-info" onclick="window.location.href='/complaint/'">投诉</button>
+                            <button type="button" class="btn btn-info"
+                                onclick="window.location.href='/complaint/'">投诉</button>
                             <br>
-                            <button type="button" class="btn btn-info" onclick="window.location.href='/service/'">客服</button>
+                            <button type="button" class="btn btn-info"
+                                onclick="window.location.href='/service/'">客服</button>
                         </div>
                     </div>
                 </div>

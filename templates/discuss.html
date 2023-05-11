@@ -1,0 +1,190 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a href="/newest/"
+                        class="btn btn-link t-nav-link {% if data['active'] == 'newest' %}active{% endif %}">
+                        <span {% if data['active']=='newest' %}class="text-white" {% endif %}>最新</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/hottest/"
+                        class="btn btn-link t-nav-link {% if data['active'] == 'hottest' %}active{% endif %}">
+                        <span {% if data['active']=='hottest' %}class="text-white" {% endif %}>最热</span>
+                    </a>
+                </li>
+                <!-- 推荐帖子按钮 -->
+                <li class="nav-item">
+                    <a href="/recommended/"
+                        class="btn btn-link t-nav-link {% if data['active'] == 'recommended' %}active{% endif %}">
+                        <span {% if data['active']=='recommended' %}class="text-white" {% endif %}>推荐</span>
+                    </a>
+                </li>
+            </ul>
+            <button class="create-post-btn" data-toggle="modal" data-target="#createPostModal">创建帖子</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="post-list">
+            {% for post in posts %}
+            <div class="post card" post-id="{{ post['id'] }}">
+                <div class="card-body">
+                    <h2 class="card-title">{{ post['title'] }}</h2>
+                    <p class="card-subtitle mb-2 text-muted">Posted by {{ post['name'] }} on {{ post['dt'] }}</p>
+                    <p class="card-text">{{ post['content'] }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
+        aria-hidden="false">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form id="createPostForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createPostModalLabel">创建新帖子</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="postTitle">标题</label>
+                            <input type="text" class="form-control" id="postTitle" name="postTitle">
+                        </div>
+                    </div>
+                    <div class="post-form">
+                        <div class="form-group">
+                            <label for="postContent">内容</label>
+                            <textarea class="form-control" id="postContent" name="postContent" rows="10"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="postPreview">预览</label>
+                            <div class="markdown-preview" id="postPreview"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <button type="submit" class="btn btn-primary">发布</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block foot %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/mode/markdown/markdown.min.js"></script>
+<script src="https://cdn.bootcss.com/marked/0.8.1/marked.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.t-nav-link').click(function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: $(this).attr('href'),
+                type: 'GET',
+                success: function (response) {
+                    $('#post-list').empty();
+                    $('#post-list').html(response);
+                }
+            });
+            $('.t-nav-link').removeClass('active');
+            $('.t-nav-link span').removeClass('text-white');
+            $(this).addClass('active');
+            $(this).find('span').addClass('text-white');
+        });
+
+        var editor = CodeMirror.fromTextArea(document.getElementById('postContent'), {
+            mode: 'markdown',
+            theme: 'monokai',
+            lineWrapping: true,
+            autofocus: true
+        });
+        function updatePreview() {
+            var preview = document.getElementById('postPreview');
+            preview.innerHTML = marked(editor.getValue());
+        }
+        $('#createPostModal').on('show.bs.modal', function () {
+            $('#postTitle').val('');
+            editor.setValue('');
+            updatePreview();
+        });
+        editor.on('change', function () {
+            updatePreview();
+        });
+        $('#createPostForm').submit(function (event) {
+            event.preventDefault();
+            var title = $('#postTitle').val();
+            var content = editor.getValue();
+            $.ajax({
+                url: '/createPost/',
+                type: 'POST',
+                data: { title: title, content: content },
+                success: function (response) {
+                    alert(response['code']);
+                }
+            });
+        });
+
+        $(".post").click(function () {
+            var postId = $(this).attr('post-id');
+            window.location.href = '/discuss/post/?id=' + postId;
+        });
+    });
+</script>
+<style>
+    .post {
+        margin-bottom: 20px;
+    }
+
+    .create-post-btn {
+        border-radius: 10px;
+        /* 设置圆角半径 */
+        background-color: green;
+        /* 设置背景颜色 */
+        color: white;
+        /* 设置字体颜色 */
+        padding: 10px 20px;
+        /* 设置内边距 */
+        font-size: 16px;
+        /* 设置字体大小 */
+        border: none;
+        /* 去掉边框 */
+        cursor: pointer;
+        /* 设置鼠标指针样式 */
+    }
+
+    .t-nav-link.active {
+        background-color: #CCE5FF;
+    }
+
+    .t-nav-link.active span {
+        text-decoration: underline;
+        color: #007BFF;
+    }
+
+    .post-form {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .post-form .form-group {
+        flex: 1;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
