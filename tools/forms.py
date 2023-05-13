@@ -173,3 +173,26 @@ class StreamBuildForm(Form):
     )
 
 
+class courseBuildForm(Form):
+    
+    
+    title = StringField(
+        "课程标题",
+        validators=[
+            DataRequired("课程标题不能为空！")
+        ]
+    )
+
+    face = StringField(
+        "头像",
+        validators=[
+            DataRequired("头像不能为空！")
+        ]
+    )
+
+    content = StringField(
+        "课程介绍",
+        validators=[
+            DataRequired("课程介绍不能为空！")
+        ]
+    )

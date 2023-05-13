@@ -8,34 +8,22 @@
             <h2 class="card-title">{{ post['title'] }}</h2>
             <!-- 显示帖子发布信息 -->
             <p class="card-subtitle mb-2 text-muted">Posted by {{ post['name'] }} on {{ post['dt'] }}</p>
-            <!-- 使用 Marked.js 将 Markdown 转换为 HTML -->
-
         </div>
-    </div>
-    <div class="card">
         <div class="card-body">
+            <!-- 使用 Marked.js 将 Markdown 转换为 HTML -->
             <div class="post-content">{{ post['content'] }}</div>
         </div>
     </div>
-    <div id="comments"></div>
-    <script>
-        new Staticman({
-            endpoint: 'https://api.staticman.net/v2/entry/Decade-qiu/comment/main/comments', // API 地址
-            username: 'Decade-qiu',
-            repository: 'comment',
-            branch: 'main',
-            path: 'comments/{options.slug}',
-            id: "{{post['id']}}",               // 页面唯一 ID
-            createdAt: 'created_at' // 创建时间戳
-        }).fetch('POST').then(function (comments) {
-            var commentsEl = document.getElementById('comments');
-            comments.forEach(function (comment) {
-                var commentEl = document.createElement('div');
-                commentEl.innerHTML = '<h4>' + comment.name + '</h4><p>' + comment.message + '</p>';
-                commentsEl.appendChild(commentEl);
-            });
-        });
-    </script>
+    <dic class="card-body">
+        <script src="https://utteranc.es/client.js"
+        repo="Decade-qiu/Decade-qiu.github.io"
+        issue-term="url"
+        label="Comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+    </dic>
 </div>
 
 

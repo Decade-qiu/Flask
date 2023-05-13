@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime  # 导入日期时间模块
-from model.models import Post, User, Video, Msg, Stream
+from model.models import Course, Post, User, Video, Msg, Stream
 from tools.orm import ORM
 from werkzeug.security import generate_password_hash  # 生成哈希密码
 import math
@@ -351,3 +351,58 @@ class CRUD:
         finally:
             session.close()
         return res
+
+    # 保存直播信息
+    @staticmethod
+    def save_course(form):
+        connect = ORM.db()
+        try:
+            course = Course(
+                title=form.data['title'],
+                createdAt=dt(),
+                content=form.data['content'],
+                face=form.data['face']
+            )
+            connect.add(course)
+        except Exception as e:
+            connect.rollback()
+            return False
+        else:
+            connect.commit()
+            return True
+        finally:
+            connect.close()
+
+    # 显示直播信息
+    @staticmethod
+    def show_course(name, page):
+        connect = ORM.db()
+        model = None
+        try:
+            if name == 'all_1mqnabzvxc':
+                model = connect.query(Course).order_by(Course.createdAt.desc())
+            else:
+                model = connect.query(Course).filter_by(userid=name).order_by(Course.createdAt.desc())
+        except Exception as e:
+            connect.rollback()
+            print(e)
+        else:
+            connect.commit()
+        finally:
+            connect.close()
+        return model.paginate(page=page, per_page=6)
+    
+    @staticmethod
+    def find_course(name):
+        connect = ORM.db()
+        model = None
+        try:
+            model = connect.query(Course).filter_by(id=name).order_by(Course.createdAt.desc()).first()
+        except Exception as e:
+            connect.rollback()
+            print(e)
+        else:
+            connect.commit()
+        finally:
+            connect.close()
+        return model

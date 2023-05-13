@@ -92,6 +92,8 @@
 <script src="https://cdn.bootcss.com/marked/0.8.1/marked.min.js"></script>
 <script>
     $(document).ready(function () {
+        var k = null;
+
         $('.t-nav-link').click(function (event) {
             event.preventDefault();
             $.ajax({
@@ -100,6 +102,10 @@
                 success: function (response) {
                     $('#post-list').empty();
                     $('#post-list').html(response);
+                    $(".post").click(function () {
+                    var postId = $(this).attr('post-id');
+                        window.location.href = '/discuss/post/?id=' + postId;
+                    });
                 }
             });
             $('.t-nav-link').removeClass('active');
@@ -144,7 +150,9 @@
             var postId = $(this).attr('post-id');
             window.location.href = '/discuss/post/?id=' + postId;
         });
+    
     });
+    
 </script>
 <style>
     .post {

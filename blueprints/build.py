@@ -20,15 +20,15 @@ bp = Blueprint("build", __name__)
 def build():
     if request.method == 'GET':
         data = dict(
-            title="直播创建",
+            title="课程创建",
             name=session.get('name', '')
         )
         return render_template("build.html", data=data)
     else:
-        form = StreamBuildForm(request.form)
+        form = courseBuildForm(request.form)
         res = dict(code=0)
         if form.validate():
-            if CRUD.save_stream(form):
+            if CRUD.save_course(form):
                 res["code"] = 1
         else:
             res = form.errors

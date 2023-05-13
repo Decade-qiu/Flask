@@ -27,7 +27,7 @@ def upload():
         os.mkdir(upload_path)
     # 指定修改名称
     imgname = files.filename
-    imgname += datetime.now().strftime("%Y%m%d%H%M%S")+uuid.uuid4().hex
+    imgname = datetime.now().strftime("%Y%m%d%H%M%S")+uuid.uuid4().hex+imgname
     files.save(os.path.join(upload_path, imgname))
     return dict(
         code=1, image=imgname

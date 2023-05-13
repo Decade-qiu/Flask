@@ -74,3 +74,10 @@ class Check(Base):
     name = Column(VARCHAR(20), nullable=False, unique=True) 
     ckt = Column(DATETIME, nullable=False)  # 修改时间
 
+class Course(Base):
+    __tablename__ = "course"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    title = Column(VARCHAR(20), nullable=False)  #
+    content = Column(TEXT)  # 消息
+    createdAt = Column(DATETIME, nullable=False)  # 创建时间
+    face = Column(VARCHAR(100), nullable=True) 

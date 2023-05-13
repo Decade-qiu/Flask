@@ -1,0 +1,42 @@
+{%import 'page.html' as pg%}
+{% extends "layout.html" %}
+{% block content %}
+<div class="col-md-10 pad-right">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">课程列表</li>
+        </ol>
+    </nav>
+    {% set v = data['course'] %}
+    <div class="card-columns">
+        {% for val in v %}
+        <div class="card video-list" 
+            courseId="{{ val.id }}">
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded"
+            src="/static/uploads/{{ val.face }}">
+            <div class="card-body">
+                <span>{{ val.title }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {{pg.my_paginate(pagination,'course.courses')}}
+    <style>
+        .video-img {
+            width: 294px;
+            height: 150px;
+        }
+    </style>
+</div>
+{% endblock %}
+
+{% block foot %}
+<script>
+    $(document).ready(function () {
+        $(".video-list").click(function () {
+            var uid = $(this).attr('courseId');
+            location.href = "/kc/?id=" + uid;
+        });
+    });
+</script>
+{% endblock %}

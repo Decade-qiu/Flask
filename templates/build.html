@@ -4,63 +4,41 @@
 <div class="col-md-10 pad-right">
     <div class="card">
         <div class="card-header">
-            直播间创建
+            课程创建
         </div>
         <div class="card-body">
             <form id="form-data">
                 <div class="form-group">
-                    <label>标题</label>
+                    <label>课程标题</label>
                     <input name="userid" type="hidden" value="{{ data['name'] }}">
                     <input class="form-control"
                            name="title"
-                           placeholder="请输入直播标题！"
+                           placeholder="请输入课程标题！"
                            type="text">
                     <p class="text-danger" id="error_title"></p>
-                </div>
-                <div class="form-group">
-                    <label>推流地址</label>
-                    <input class="form-control"
-                           name="url"
-                           placeholder="请输入直播推流地址！"
-                           type="text">
-                    <p class="text-danger" id="error_url"></p>
                 </div>
                 <div class="form-group">
                     <label>课程介绍</label>
                     <textarea class="form-control"
                               placeholder="请输入课程介绍！"
                               rows="5"
-                              name="info"></textarea>
-                    <p class="text-danger" id="error_info"></p>
-                </div>
-                <div class="row">
-                    <div class="form-group col-md-6">
-                        <label>直播开始时间</label>
-                        <input class="form-control"
-                               name="title"
-                               placeholder="请输入直播开始时间！"
-                               type="text">
-                        <p class="text-danger" id="error_title"></p>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>直播预计时长</label>
-                        <input class="form-control"
-                               name="title"
-                               placeholder="请输入直播预计时长！"
-                               type="text">
-                        <p class="text-danger" id="error_title"></p>
-                    </div>
+                              name="content"></textarea>
+                    <p class="text-danger" id="error_content"></p>
                 </div>
                 <div class="form-group">
-                    <label>直播密钥(可选)</label>
-                    <input class="form-control"
-                           name="title"
-                           placeholder="请输入不少于6位且由字母、数字和特殊字符组成的密钥"
-                           type="text">
-                    <p class="text-danger" id="error_title"></p>
+                    <label for="input_face">头像</label>
+                    <input type="file" class="form-control-file" id="file_face">
+                    <input type="hidden" name="face" id="input_face" value="">
+                    <hr class="hr-dv">
+                    <div id="image_face">
+                        <img data-src="holder.js/200x200">
+                    </div>
+                    <hr class="hr-dv">
+                    <a class="btn btn-info" id="upload_face" href="javascript:void(0)">上传头像</a>
+                    <p class="text-danger" id="error_face"></p>
                 </div>
                 <div class="form-group">
-                    <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">发布直播</a>
+                    <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">发布课程</a>
                 </div>
             </form>
         </div>
@@ -69,10 +47,12 @@
 {% endblock %}
 
 {% block foot %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
 <script src="{{ url_for('static', filename='js/request.js') }}"></script>
 <script>
     $(document).ready(function () {
-        request('/build/', '/myStream/', ['title', 'url', 'userid'], '创建成功！');
+        upload('face', 200, 200, '/upload/');
+        request('/build/', '/courses/', ['title', 'content', 'face'], '创建成功！');
     });
 </script>
 {% endblock %}
