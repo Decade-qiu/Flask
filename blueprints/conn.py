@@ -34,7 +34,6 @@ def conn():
         cur_time = datetime.now()
         if  cur_time > time:
             f = "已经超时！"
-            ff = 0
         if ff == 1:
             check = Check(
                 key=key,

@@ -205,13 +205,12 @@
     }
     function onMediaSuccess(stream) {
         mediaRecorder = new MediaStreamRecorder(stream);
-        // mediaRecorder.mimeType = 'audio/wav';
         mediaRecorder.mimeType = 'video/webm;codecs=vp9,opus';
         mediaRecorder.ondataavailable = function (blob) {
             var blobURL = URL.createObjectURL(blob);
             conn.send(blobURL);
         };
-        mediaRecorder.start(10000);
+        mediaRecorder.start(1000);
     }
     function onMediaError(e) {
         console.error('media error', e);

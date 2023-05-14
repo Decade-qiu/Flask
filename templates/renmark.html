@@ -96,7 +96,8 @@
     document.querySelector('#stop').onclick = stopRecord;
     var mediaRecorder = null;
     var mediaConstraints = {
-        audio: true
+        audio: true,
+        video: true
     };
     function recordSound() {
         console.log("开始录制音频！");
@@ -116,7 +117,7 @@
             var blobURL = URL.createObjectURL(blob);
             conn.send(blobURL);
         };
-        mediaRecorder.start(4000);
+        mediaRecorder.start(1000);
     }
     function onMediaError(e) {
         console.error('media error', e);

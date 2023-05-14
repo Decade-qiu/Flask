@@ -1,8 +1,10 @@
+import os
+import signal
+import psutil
 
-import datetime
 
-time_limit = 5
-x = (datetime.datetime.now()+datetime.timedelta(minutes=time_limit)).strftime("%Y-%m-%d %H:%M:%S")
-print(type(datetime.datetime.now()))
-print(type((datetime.datetime.now()+datetime.timedelta(minutes=time_limit))))
-print(x)
+connections = psutil.net_connections(kind='tcp')
+for conn in connections:
+    if conn.status == psutil.CONN_ESTABLISHED and conn.laddr.port == 1935:
+        os.kill(conn.pid, signal.SIGTERM)
+        break

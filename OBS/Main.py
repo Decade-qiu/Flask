@@ -471,15 +471,20 @@ class OBS(QWidget):
             self.show_checkin_dialog()
     def on_online_button_clicked(self):
         # 获取当前在线学生的人数和昵称
-        online_students = ["小明", "小红", "小刚", "小张", "小李", "小王", "小赵", "小钱", "小周", "小吴", "小郑", "小孙", "小陈", "小崔", "小段"]
-        online_status = [True, False, True, True, False, True, True, True, False, False, False, True, False, True, False]
+        online_students = ["小明", "小红", "小刚", "小张", "小李", "小王", "小赵", "小钱", "小周", "州2"]
+        online_status = [1, -1, 1, 1, -1, 1, 1, 1, -1,-1]
         session = ORM.db()
+        stream = session.query(Stream).filter(Stream.id==self.key).first()
+        time = stream.cktAt
         persons = session.query(Check).filter(Check.key == self.key).all()
         session.close()
         for person in persons:
             if person.name not in online_students:
                 online_students.append(person.name)
-                online_status.append(True)
+                st = 1
+                if person.ckt > time:
+                    st = 0
+                online_status.append(st)
         # 创建多行文本框和滚动区域
         widget = QWidget()
         layout = QVBoxLayout(widget)
@@ -489,11 +494,15 @@ class OBS(QWidget):
             font = QFont()
             font.setPointSize(25)  # 设置学生姓名的字体大小
             student_label.setFont(font)
-            # student_label.setFixedSize(80, 80)  # 调整学生姓名的大小
             online_label = QLabel()
             online_label.setFixedSize(50, 50)  # 调整旁边圆圈的大小
             online_pixmap = QPixmap(25, 25)
-            online_pixmap.fill(QColor("green" if status else "red"))
+            col = "green"
+            if status == -1:
+                col = "red"
+            elif status == 0:
+                col = "yellow"
+            online_pixmap.fill(QColor(col))
             painter = QPainter(online_pixmap)
             painter.setBrush(QBrush(QColor("white")))
             painter.drawEllipse(2, 2, 12, 12)

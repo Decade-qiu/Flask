@@ -25,7 +25,7 @@
         bready(function () {
             use(["canvas-designer-widget"], function () {
                 var transports = ["websocket"];
-                var websocket = new SockJS("http://127.0.0.1:8000/board", transports);
+                var websocket = new SockJS("http://127.0.0.1:8000/board", transports)`  ;
                 var designer = new CanvasDesigner();
                 var olddata = null;
                 designer.widgetHtmlURL = 'https://www.webrtc-experiment.com/Canvas-Designer/widget.html'; // you can place this file anywhere
