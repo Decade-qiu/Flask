@@ -46,8 +46,7 @@ class AudioHandler(SockJSConnection):
     def on_message(self, message):
         print(message)
         for conn in self.connections:
-            if conn != self:
-                conn.send(message)
+            conn.send(message)
 
     def on_close(self):
         self.connections.remove(self)

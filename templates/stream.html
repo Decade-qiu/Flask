@@ -32,7 +32,7 @@
             </li>
             <li class="breadcrumb-item active" aria-current="page">
             <li id="record" style="display: inline-block;">
-                <button>连麦</button>
+                <button>开麦</button>
             </li>
             <li id="stop" style="display: inline-block;">
                 <button>关麦</button>
@@ -42,6 +42,7 @@
                 <audio id="my-audio" src="" controls autoplay></audio>
             </li>
             <video id="hidden-video" style="display: none;"></video>
+            <iframe id="iframe" src="http://localhost:8080/players/rtc_publisher.html" allow='microphone;camera;' style="display: none;"></iframe>
         </ol>
     </nav>
     <div id="dplayer">
@@ -146,8 +147,38 @@
             }
         });
     });
+    var transports = ["websocket"];
+    conn = new SockJS('http://127.0.0.1:8000/audio', transports);
+    conn.onopen = function () {
+        console.log("音频服务器连接！");
+    };
+    conn.onmessage = function (event) {
+        console.log(event.data);
+        openWindow();
+    };
+    function openWindow() {
+        const url = 'http://localhost:8000/renmark/';
+        const windowName = '_blank';
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+        const width = Math.floor(screenWidth / 5);
+        const height = Math.floor(screenHeight / 5);
+        const left = screenWidth - width;
+        const top = 0;
+        const features = `width=${width},height=${height},left=${left},top=${top},location=no`;
+        window.open(url, windowName, features);
+        // const scrollX = 0;
+        // const scrollY = Math.floor((newWindow.document.body.scrollHeight - height) / 2);
+        // newWindow.scrollTo(scrollX, scrollY);
+    }   
+    document.querySelector('#record').onclick = startPublish;
+    function startPublish() {
+        const code = "document.getElementById('btn_publish').click();";
+        document.getElementById('iframe').contentWindow.postMessage(code,'*');
+        conn.send("webrtc://localhost/live/livestream");
+    }
 </script>
-<script>
+<!-- <script>
     var transports = ["websocket"];
     conn = new SockJS('http://127.0.0.1:8000/audio', transports);
     conn.onopen = function () {
@@ -155,17 +186,6 @@
     };
     conn.onmessage = function (event) {
         console.log(event);
-        // var audio_url = document.getElementById('my-audio');
-        // audio_url.src = event.data;
-        // audio_url.addEventListener('canplaythrough', function () {
-        //     audio_url.play();
-        // });
-        // var video_url = document.getElementById('my-video');
-        // video_url.src = event.data;
-        // video_url.addEventListener('canplaythrough', function () {
-        //     video_url.play();
-        // });
-        openPlayerWindow(event.data);
     };
     function openPlayerWindow(url) {
         var playerWindow = window.open('', 'playerWindow', 'width=800,height=600');
@@ -215,6 +235,6 @@
     function onMediaError(e) {
         console.error('media error', e);
     }
-</script>
+</script> -->
 <script src="{{ url_for('static',filename='js/chat.js') }}"></script>
 {% endblock %}
