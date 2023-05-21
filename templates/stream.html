@@ -154,28 +154,42 @@
     };
     conn.onmessage = function (event) {
         console.log(event.data);
-        openWindow();
+        // openWindow();
+        var card = document.querySelector('.rtc');
+        card.style.display = 'block';
+        $('.jswebrtc').attr('data-url', event.data);
+        card.querySelectorAll('video').forEach(video => {
+            video.style.height = '140px';
+            video.autoplay = true;
+            video.muted = true;
+            video.play();
+            video.muted = false;
+        });
     };
-    function openWindow() {
-        const url = 'http://localhost:8000/renmark/';
-        const windowName = '_blank';
-        const screenWidth = screen.width;
-        const screenHeight = screen.height;
-        const width = Math.floor(screenWidth / 5);
-        const height = Math.floor(screenHeight / 5);
-        const left = screenWidth - width;
-        const top = 0;
-        const features = `width=${width},height=${height},left=${left},top=${top},location=no`;
-        window.open(url, windowName, features);
-        // const scrollX = 0;
-        // const scrollY = Math.floor((newWindow.document.body.scrollHeight - height) / 2);
-        // newWindow.scrollTo(scrollX, scrollY);
-    }   
-    document.querySelector('#record').onclick = startPublish;
-    function startPublish() {
-        const code = "document.getElementById('btn_publish').click();";
-        document.getElementById('iframe').contentWindow.postMessage(code,'*');
-        conn.send("webrtc://localhost/live/livestream");
+    document.querySelector('#record').onclick = recordSound;
+    document.querySelector('#stop').onclick = stopRecord;
+    function recordSound() {
+        $.ajax({
+            url: "/mute/",
+            type: "POST",
+            data: {
+                streamid: $("#input_id").val()
+            },
+            dataType: "json",
+            success: function (res) {
+                if (res['code'] == 1){
+                    alert("教师开启了全员静音！")
+                }else{
+                    const code = "document.getElementById('btn_publish').click();";
+                    document.getElementById('iframe').contentWindow.postMessage(code,'*');
+                    conn.send("webrtc://localhost/live/livestream");
+                }
+            }
+        });
+    }
+    function stopRecord() {
+        if (mediaRecorder != null) mediaRecorder.stop();
+        alert("关麦成功")
     }
 </script>
 <!-- <script>

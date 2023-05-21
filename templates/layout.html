@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/theme/monokai.min.css" />
     <script src="https://unpkg.com/staticman/dist/staticman.js"></script>
+    <script type="text/javascript" src="/static/js/jswebrtc.min.js"></script>
     <style>
         #mynavbar {
             background: rgba(32, 92, 152, 0.95);
@@ -37,6 +38,9 @@
             padding-top: 70px;
             margin: 0 auto;
             position: relative;
+        }
+        .jswebrtc {
+            height: 140px;
         }
     </style>
     {% block head %}{% endblock %}
@@ -118,6 +122,9 @@
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="button" id="btn-search">搜索</button>
                     </div>
+                </div>
+                <div class="card rtc" style="display: none;">
+                    <div class="jswebrtc" data-url="webrtc://localhost/live/livestream" ></div>
                 </div>
                 <div class="card">
                     <div class="card-header">
