@@ -81,3 +81,5 @@ class Course(Base):
     content = Column(TEXT)  # 消息
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     face = Column(VARCHAR(100), nullable=True) 
+    own = Column(VARCHAR(20), nullable=False, unique=True)  # 昵称
+    streamid = Column(INTEGER)

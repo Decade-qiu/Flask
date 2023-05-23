@@ -61,6 +61,15 @@ class User(Base):
 
     def check_pwd(self, pwd):
         return check_password_hash(self.pwd, pwd) 
+class Course(Base):
+    __tablename__ = "course"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    title = Column(VARCHAR(20), nullable=False)  #
+    content = Column(TEXT)  # 消息
+    createdAt = Column(DATETIME, nullable=False)  # 创建时间
+    face = Column(VARCHAR(100), nullable=True) 
+    own = Column(VARCHAR(20), nullable=False, unique=True)  # 昵称
+    streamid = Column(INTEGER)
 SECRET_KEY = "asdfasdfjasdfjasd;lf"
 HOSTNAME = '127.0.0.1'
 PORT = '3306'
@@ -241,6 +250,7 @@ class OBS(QWidget):
         self.stream_key_edit = QLineEdit()
         self.stream_key_edit.setPlaceholderText("推流密钥")
         self.stream_settings_box.addWidget(self.stream_key_edit)
+        # 创建课程选择框
         # 创建推流来源选择框
         self.stream_source_combo = QComboBox()
         self.stream_source_combo.addItem("摄像头")
@@ -332,6 +342,22 @@ class OBS(QWidget):
             # 登录成功
             QMessageBox.information(self, "登录", "登录成功！")
             self.login_button.setText(username)
+            self.course_combo = QComboBox()
+            connect = ORM.db()
+            try:
+                courses = connect.query(Course).filter(Course.own == self.login_button.text()).order_by(Course.createdAt.desc())
+                print(self.login_button.text())
+                for course in courses:
+                    print(course.title)
+                    self.course_combo.addItem(course.title)
+            except Exception as e:
+                connect.rollback()
+                print(e)
+            else:
+                connect.commit()
+            finally:
+                connect.close()
+            self.stream_settings_box.addWidget(self.course_combo)
     def kill_ffmpeg(self):
         connections = psutil.net_connections(kind='tcp')
         for conn in connections:
@@ -382,6 +408,17 @@ class OBS(QWidget):
             QMessageBox.information(self, "Sucess", "你的推流地址为\n"+'rtmp://127.0.0.1:1935/myapp/'+stream_key+" id ="+str(self.key))
         finally:
             connect.close()
+        session = ORM.db()
+        sss = session.query(Stream).filter(Stream.title == self.stream_key_edit.text()).first()
+        self.streamid = sss.id
+        session.commit()
+        session.close()
+        session = ORM.db()
+        cou = session.query(Course).filter(Course.title==self.course_combo.currentText()).update({Course.streamid:self.streamid})
+        print(self.streamid)
+        print(cou)
+        session.commit()
+        session.close()
         self.url = r'ffmpeg -f dshow -i video="@device_pnp_\\?\usb#vid_04f2&pid_b67c&mi_00#6&26fcf372&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global" -f dshow -i audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{4D3E6045-E4F5-48E3-9474-54421A73A77B}" -r 30 -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv -bufsize 100k rtmp://127.0.0.1:1935/myapp/'+stream_key
         print("********正在推流!********")
         if self.stream_source_combo.currentText() != "摄像头":

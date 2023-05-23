@@ -13,17 +13,30 @@
             <div class="col-md-4">
                 <img src="/static/uploads/{{ v.face }}" class="card-img" alt="{{ v.title }}">
             </div>
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <div class="card-body">
-                    <h5 class="card-title">{{ v.title }}</h5>
+                    <h5 class="card-title" name="title" value="{{v.titl
+                    }}">{{ v.title }}</h5>
+                    <p class="card-text">主讲教师：{{ v.own }}</p>
                     <p class="card-text">价格：1 元</p>
-                    <p class="card-text">参加人数：1 人</p>
+                    <p class="card-text">参加人数：{{ data['pnum'] }} 人</p>
+                    {% for val in data['names'] %}
+                    <p class="card-text" style="display:inline-block;">{{ val }}</p>
+                    {% endfor %}
                 </div>
+            </div>
+            <div class="col-md-2">
+                <button class="add">加入课程</button>
             </div>
         </div>
         <div>
+            {% if data['streamid'] != None %}
+            <div class="card-header">
+                <a href="/stream/?app=undefined&name={{data['streamname']}}&id={{data['streamid']}}">最新课程教学直播间</a>
+            </div>
+            {% endif %}
             <div class="card-footer">
-                <p class="card-text">{{ v.content }}</p>
+                <p class="card-text">{{ data['content'] }}</p>
             </div>
         </div>
     </div>
@@ -33,7 +46,42 @@
 {% block foot %}
 <script>
     $(document).ready(function () {
-        
+        function flash(){
+            if (courseIsSelected()) {
+                var button = document.querySelector('.add');
+                button.innerText = '已加入课程';
+                button.disabled = true;
+            }
+        }
+        flash();
+        function courseIsSelected() {
+            var names = "{{ data['names'] }}";
+            var name = "{{ session.get('name', '') }}";
+            if (names.indexOf(name) != -1) {
+                return true;
+            }
+            return false;
+        }
+        $(".add").click(function () {
+            addCourseToCart();
+        });
+        function addCourseToCart() {
+            $.ajax({
+                url: '/kc/add',
+                type: 'post',
+                data: {
+                    'stu': "{{ session.get('name', '') }}",
+                    'title': "{{ data['course'].title }}"
+                },
+                success: function (data) {
+                    if (data['code'] == 0) {
+                        $(".add").html("已加入课程");
+                        document.querySelector('.add').disabled = true;
+                        // flash();
+                    }
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

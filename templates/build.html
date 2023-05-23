@@ -8,9 +8,12 @@
         </div>
         <div class="card-body">
             <form id="form-data">
+                <div class="form-group" style="display: none;">
+                    <input name="userid" value="{{ data['name'] }}">
+                </div>
                 <div class="form-group">
                     <label>课程标题</label>
-                    <input name="userid" type="hidden" value="{{ data['name'] }}">
+                    
                     <input class="form-control"
                            name="title"
                            placeholder="请输入课程标题！"
@@ -26,7 +29,7 @@
                     <p class="text-danger" id="error_content"></p>
                 </div>
                 <div class="form-group">
-                    <label for="input_face">头像</label>
+                    <label for="input_face">封面</label>
                     <input type="file" class="form-control-file" id="file_face">
                     <input type="hidden" name="face" id="input_face" value="">
                     <hr class="hr-dv">

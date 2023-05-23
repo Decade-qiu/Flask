@@ -9,6 +9,7 @@ function request(url, rurl, fields, msg) {
     $("#btn-sub").click(function () {
         //获取表单数据
         var data = $("#form-data").serialize();
+        console.log(data);
         //触发请求，ajax
         $.ajax({
             url: url,

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import datetime  # 导入日期时间模块
+import datetime
+import json  # 导入日期时间模块
 from model.models import Course, Post, User, Video, Msg, Stream
 from tools.orm import ORM
 from werkzeug.security import generate_password_hash  # 生成哈希密码
@@ -242,6 +243,20 @@ class CRUD:
             connect.close()
         return CRUD.page(model)
 
+    # 根据id获取直播信息
+    def find_stream(id):
+        connect = ORM.db()
+        stream = None
+        try:
+            stream = connect.query(Stream).filter_by(id=int(id)).first()
+        except Exception as e:
+            connect.rollback()
+        else:
+            connect.commit()
+        finally:
+            connect.close()
+        return stream
+
     @staticmethod
     def page(model):
         # 获取页码
@@ -357,15 +372,19 @@ class CRUD:
     def save_course(form):
         connect = ORM.db()
         try:
+            data = {'info': form.data['content'], 'name': ""}
+            print(data, form.data['userid'])
             course = Course(
                 title=form.data['title'],
                 createdAt=dt(),
-                content=form.data['content'],
-                face=form.data['face']
+                content=json.dumps(data),
+                face=form.data['face'],
+                own=form.data['userid']
             )
             connect.add(course)
         except Exception as e:
             connect.rollback()
+            print(e)
             return False
         else:
             connect.commit()
@@ -406,3 +425,22 @@ class CRUD:
         finally:
             connect.close()
         return model
+    
+    @staticmethod
+    def add_course(title, stu):
+        connect = ORM.db()
+        try:
+            course = connect.query(Course).filter_by(title=title).first()
+            content = json.loads(course.content)
+            names = content['names']
+            names += " "+stu
+            content['names'] = names
+        except Exception as e:
+            connect.rollback()
+            print(e)
+            return False
+        else:
+            connect.commit()
+            return True
+        finally:
+            connect.close()

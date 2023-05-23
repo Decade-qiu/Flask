@@ -30,6 +30,8 @@ def build():
         if form.validate():
             if CRUD.save_course(form):
                 res["code"] = 1
+            else:
+                res["code"] = 0
         else:
             res = form.errors
             res["code"] = 0
