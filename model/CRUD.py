@@ -401,7 +401,7 @@ class CRUD:
             if name == 'all_1mqnabzvxc':
                 model = connect.query(Course).order_by(Course.createdAt.desc())
             else:
-                model = connect.query(Course).filter_by(userid=name).order_by(Course.createdAt.desc())
+                model = connect.query(Course).filter(Course.content.like(f"%{name}%")).order_by(Course.createdAt.desc())
         except Exception as e:
             connect.rollback()
             print(e)

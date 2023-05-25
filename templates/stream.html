@@ -21,9 +21,6 @@
             <li class="breadcrumb-item active" aria-current="page" id="zhibo">
                 <button>直播页面</button>
             </li>
-            <li class="breadcrumb-item active" aria-current="page" id="pmfx">
-                <button>屏幕分享</button>
-            </li>
             <li class="breadcrumb-item active" aria-current="page" id="whiteboard">
                 <button>白板</button>
             </li>
@@ -48,6 +45,7 @@
     <div id="dplayer">
         <video id="videoElement" style="width:100%; height:100%; object-fit: fill"></video>
     </div>
+    <div id="board" style="width:97vw;height:97vh;color: white;"></div>
     <div class="row" style="margin-top: 12px;">
         <div class="col-md-12">
             <div class="card" id="chat-card">
@@ -191,6 +189,66 @@
         if (mediaRecorder != null) mediaRecorder.stop();
         alert("关麦成功")
     }
+</script>
+<script type="text/javascript">
+    bready(function () {
+        use(["canvas-designer-widget"], function () {
+            var transports = ["websocket"];
+            var websocket = new SockJS("http://127.0.0.1:8000/board", transports);
+            var designer = new CanvasDesigner();
+            var olddata = null;
+            designer.widgetHtmlURL = 'https://www.webrtc-experiment.com/Canvas-Designer/widget.html'; // you can place this file anywhere
+            designer.widgetJsURL = 'https://www.webrtc-experiment.com/Canvas-Designer/widget.js'; 
+            websocket.onopen = function () {
+                if (designer.pointsLength > 0) {
+                    designer.sync();
+                }
+            };
+            websocket.onmessage = function (event) {
+                if (olddata != event.data) {
+                    console.log("not same");
+                    designer.syncData(JSON.parse(event.data));
+                    olddata = event.data;
+                }
+            };
+            designer.addSyncListener(function (data) {
+                var comedata = JSON.stringify(data);
+                if (olddata != comedata) {
+                    olddata = comedata;
+                    console.log("not the same");
+                    websocket.send(comedata);
+                }
+            });
+            designer.setSelected('pencil');
+            designer.setTools({
+                pencil: true,
+                text: true,
+                image: true,
+                pdf: true,
+                eraser: true,
+                line: true,
+                arrow: true,
+                dragSingle: true,
+                dragMultiple: true,
+                arc: true,
+                rectangle: true,
+                quadratic: true,
+                bezier: true,
+                marker: true,
+                zoom: true,
+                lineWidth: true,
+                colorsPicker: true,
+                extraOptions: true,
+                code: true,
+                undo: true
+            });
+            designer.appendTo(document.getElementById("board"));
+            setInterval(function () {
+                console.log("update");
+                designer.sync();
+            },1000);
+        });
+    });
 </script>
 <!-- <script>
     var transports = ["websocket"];

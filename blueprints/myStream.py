@@ -20,7 +20,6 @@ bp = Blueprint("myStream", __name__)
 def myStream():
     data = dict(
         title="直播列表",
-        stream=''
     )
     page = request.args.get('page', 1)
     res = CRUD.show_stream(session.get('name', ''), int(page))

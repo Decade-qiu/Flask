@@ -4,43 +4,44 @@
 <div class="col-md-10 pad-right">
     <div class="card">
         <div class="card-header">
-            课程创建
+            课程修改
         </div>
         <div class="card-body">
             <form id="form-data">
                 <div class="form-group" style="display: none;">
-                    <input name="userid" value="{{ data['name'] }}">
+                    <input name="courseid" value="{{ data['course'].id }}">
                 </div>
                 <div class="form-group">
                     <label>课程标题</label>
                     <input class="form-control"
                            name="title"
-                           placeholder="请输入课程标题！"
-                           type="text">
+                           placeholder="{{ data['course'].title }}"
+                           type="text"
+                           value="{{ data['course'].title }}">
                     <p class="text-danger" id="error_title"></p>
                 </div>
                 <div class="form-group">
                     <label>课程介绍</label>
                     <textarea class="form-control"
-                              placeholder="请输入课程介绍！"
+                              placeholder="{{ data['con'] }}"
                               rows="5"
-                              name="content"></textarea>
+                              name="content">{{ data['con'] }}</textarea>
                     <p class="text-danger" id="error_content"></p>
                 </div>
                 <div class="form-group">
                     <label for="input_face">封面</label>
                     <input type="file" class="form-control-file" id="file_face">
-                    <input type="hidden" name="face" id="input_face" value="">
+                    <input type="hidden" name="face" id="input_face" value="{{ data['course'].face }}">
                     <hr class="hr-dv">
                     <div id="image_face">
-                        <img data-src="holder.js/200x200">
+                        <img src="/static/uploads/{{ data['course'].face }}" style="width: 200px;height: 200px">
                     </div>
                     <hr class="hr-dv">
                     <a class="btn btn-info" id="upload_face" href="javascript:void(0)">上传头像</a>
                     <p class="text-danger" id="error_face"></p>
                 </div>
                 <div class="form-group">
-                    <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">发布课程</a>
+                    <a class="btn btn-primary" href="javascript:void(0)" id="btn-sub">完成</a>
                 </div>
             </form>
         </div>
@@ -50,11 +51,26 @@
 
 {% block foot %}
 <script src="{{ url_for('static', filename='js/upload.js') }}"></script>
-<script src="{{ url_for('static', filename='js/request.js') }}"></script>
 <script>
     $(document).ready(function () {
         upload('face', 200, 200, '/upload/');
-        request('/build/', '/courses/', ['title', 'content', 'face'], '创建成功！');
+        $("#btn-sub").click(function () {
+            var data = $("#form-data").serialize();
+            $.ajax({
+                url: '/course/update/',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (data) {
+                    if (data.code == 0) {
+                        alert('修改成功!');
+                        location.href = '/myCourse/';
+                    } else {
+                        alert('修改失败!');
+                    }
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
