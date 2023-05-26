@@ -69,10 +69,11 @@ def updcourses():
             "updCourse.html", data=data,
         )
     else:
-        form = courseBuildForm(request.form)
+        form = courseUpdForm(request.form)
         uid = form.data['courseid']
         course = None
         connect = ORM.db()
+        data = dict()
         data['code'] = 1
         try:
             course = connect.query(Course).filter_by(id=uid).order_by(Course.createdAt.desc()).first()

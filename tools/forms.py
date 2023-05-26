@@ -203,3 +203,41 @@ class courseBuildForm(Form):
             DataRequired("课程介绍不能为空！")
         ]
     )
+
+class courseUpdForm(Form):
+    
+    
+    title = StringField(
+        "课程标题",
+        validators=[
+            DataRequired("课程标题不能为空！")
+        ]
+    )
+
+    face = StringField(
+        "头像",
+        validators=[
+            DataRequired("头像不能为空！")
+        ]
+    )
+
+    content = StringField(
+        "课程介绍",
+        validators=[
+            DataRequired("课程介绍不能为空！")
+        ]
+    )
+
+    userid = StringField(
+        "教师",
+        validators=[
+            DataRequired("课程介绍不能为空！")
+        ]
+    )
+
+    courseid = StringField(
+        "教师",
+        validators=[
+            DataRequired("课程介绍不能为空！")
+        ]
+    )

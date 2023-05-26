@@ -11,6 +11,7 @@ function upload(k, w, h, url) {
         if (img) {
             var formData = new FormData();
             formData.append("img", img);
+            console.log(formData);
             $.ajax({
                 url: url,
                 type: "POST",

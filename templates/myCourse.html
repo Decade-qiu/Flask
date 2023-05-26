@@ -10,18 +10,22 @@
     {% set v = data['course'] %}
     <div class="card-columns">
         {% for val in v %}
-        <div class="card iiid" 
+        <div class="card" 
             courseId="{{ val.id }}">
-            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded video-list"
+            <img class="card-img-top mx-auto d-block video-img blur-up img-bk lazyloaded video-list iiid"
+            courseId="{{ val.id }}"
             src="/static/uploads/{{ val.face }}">
             <div class="card-body d-flex flex-column">
                 <div class="row">
-                    <div class="col-sm-8 video-list">
+                    <div class="col-sm-8 video-list iiid"
+                    courseId="{{ val.id }}">
                         <span style="font-size:larger;">{{ val.title }}</span>
                     </div>
                     {% if val.own == session.get('name', '') %}
                     <div class="col-sm-4">
-                        <button class="btn btn-info float-right upd" courseId="{{ val.id }}">修改</button>
+                        <button class="btn btn-info float-right upd" courseId="{{ val.id }}"
+                        onclick="location.href='/course/update/?id={{ val.id }}'"
+                        >修改</button>
                     </div>
                     {% else %}
                     <div class="col-sm-4" >
@@ -46,14 +50,9 @@
 {% block foot %}
 <script>
     $(document).ready(function () {
-        $(".card").click(function () {
+        $(".iiid").click(function () {
             var uid = $(this).attr('courseId');
             location.href = "/kc/?id=" + uid;
-        });
-        const button = document.querySelector('.upd');
-        button.addEventListener('click', () => {
-            var uid = $(".iiid").attr('courseId');
-            location.href = "/course/update/?id=" + uid;
         });
     });
 </script>
