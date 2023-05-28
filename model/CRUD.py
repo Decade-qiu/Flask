@@ -5,7 +5,7 @@ from model.models import Course, Post, User, Video, Msg, Stream
 from tools.orm import ORM
 from werkzeug.security import generate_password_hash  # 生成哈希密码
 import math
-from flask import request
+from flask import request, session
 
 
 
@@ -372,7 +372,7 @@ class CRUD:
     def save_course(form):
         connect = ORM.db()
         try:
-            data = {'info': form.data['content'], 'name': ""}
+            data = {'info': form.data['content'], 'name': session.get('name', '')}
             print(data, form.data['userid'])
             course = Course(
                 title=form.data['title'],

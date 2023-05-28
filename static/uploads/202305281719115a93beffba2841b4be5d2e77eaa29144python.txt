@@ -1,0 +1,114 @@
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openqa.selenium.By;
+
+public class Example {
+
+    // Mooctest Selenium Example
+
+
+    // <!> Check if selenium-standalone.jar is added to build path.
+
+    public static void test(WebDriver driver) throws InterruptedException {
+        // TODO Test script
+        // eg:driver.get("https://www.baidu.com/")
+        // eg:driver.findElement(By.id("wd"));
+    	driver.manage().window().maximize();
+    	driver.get("https://www.suning.com/");
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("//*[@id=\"citybName\"]")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("//*[@id=\"sncity\"]/div/div/div/div/ul[2]/li/span[11]/a")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("/html/body/div[6]/div[1]/a")).click();
+//    	driver.findElement(By.linkText("分类")).click();
+    	List<String> it = new ArrayList<String>(driver.getWindowHandles());
+    	driver.switchTo().window(it.get(1));
+    	Thread.sleep(2000);
+//    	driver.findElement(By.cssSelector("body > div.ng-nav-bar.ng-nav-bar-chanel > div.ng-nav-index > ul > li:nth-child(3) > a")).click();
+    	driver.findElement(By.xpath("/html/body/div[4]/div[2]/ul/li[3]/a")).click();
+//    	driver.findElement(By.linkText("苏宁家电")).click();
+    	it = new ArrayList<String>(driver.getWindowHandles());
+    	driver.switchTo().window(it.get(2));
+    	Thread.sleep(2000);
+//    	driver.findElement(By.cssSelector("body > div.first-screen > div.dianqi-nav-wrapper > div > ul > li:nth-child(1) > span > a:nth-child(1)")).click();
+    	driver.findElement(By.linkText("挂式空调")).click();
+    	it = new ArrayList<String>(driver.getWindowHandles());
+    	driver.switchTo().window(it.get(3));
+    	Thread.sleep(2000);
+//    	new WebDriverWait(driver, 20).until(ExpectedConditions.visibilityOfElementLocated(
+//    			By.cssSelector("#美的Midea > a > img")));
+    	new WebDriverWait(driver, 20).until(ExpectedConditions.visibilityOfElementLocated(
+    			By.xpath("//*[@id=\"美的Midea\"]/a")));
+    	Thread.sleep(3000);
+//    	driver.findElement(By.cssSelector("#美的Midea > a > img")).click();
+    	driver.findElement(By.xpath("//*[@id=\"美的Midea\"]/a")).click();
+    	Thread.sleep(2000);
+//    	driver.findElement(By.xpath("//*[@id=\"3匹\"]/span")).click();
+    	driver.findElement(By.linkText("3匹")).click();
+    	Thread.sleep(2000);
+//    	driver.findElement(By.xpath("//*[@id=\"0-7000\"]")).click();
+    	driver.findElement(By.linkText("0-7000")).click();
+    	Thread.sleep(2000);
+//    	driver.findElement(By.cssSelector("#ssdsn_search_pro_baoguang-1-0-1_1_01\\:0071564281_12114867081 > img")).click();
+    	driver.findElement(By.xpath("//*[@id=\"ssdsn_search_pro_baoguang-1-0-1_1_01:0071564281_12114867081\"]/img")).click();
+    	it = new ArrayList<String>(driver.getWindowHandles());
+    	driver.switchTo().window(it.get(4));
+//    	driver.switchTo().window(it.get(3));
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("//*[@id=\"searchKeywords\"]")).click();
+    	driver.findElement(By.xpath("//*[@id=\"searchKeywords\"]")).sendKeys("格力空调");
+    	driver.findElement(By.xpath("//*[@id=\"searchEbuySubmit\"]")).click();
+//    	driver.findElement(By.xpath("//*[@id=\"searchKeywords\"]")).click();
+//    	driver.findElement(By.xpath("//*[@id=\"searchKeywords\"]")).sendKeys("格力空调");
+//    	driver.findElement(By.xpath("//*[@id=\"searchSubmit\"]")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.linkText("家用空调")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("//*[@id=\"2匹\"]")).click();
+//    	driver.findElement(By.linkText("2匹")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("//*[@id=\"新3级\"]")).click();
+//    	driver.findElement(By.linkText("新3级")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("//*[@id=\"5000-6000\"]")).click();
+//    	driver.findElement(By.linkText("5000-6000")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("//*[@id=\"挂壁式空调\"]")).click();
+//    	driver.findElement(By.linkText("挂壁式空调")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.xpath("//*[@id=\"主卧\"]")).click();
+//    	driver.findElement(By.linkText("主卧")).click();
+    	Thread.sleep(2000);
+//    	driver.findElement(By.cssSelector("#ssdsn_search_pro_baoguang-1-0-1_1_03\\:0071377307_12226191739 > img")).click();
+    	driver.findElement(By.xpath("//*[@id=\"ssdsn_search_pro_baoguang-1-0-1_1_03:0071377307_12226191739\"]/img")).click();
+    	it = new ArrayList<String>(driver.getWindowHandles());
+    	driver.switchTo().window(it.get(5));
+    	Thread.sleep(2000);
+//    	driver.findElement(By.cssSelector("#addCart")).click();
+    	driver.findElement(By.linkText("加入购物车")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.cssSelector("body > div.m-dialog > div > div.content > div > div.add-cart-hd.clearfix > a")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.linkText("删除")).click();
+    	Thread.sleep(2000);
+    	driver.findElement(By.linkText("确定")).click();
+    	Thread.sleep(2000);
+    }
+
+    public static void main(String[] args) {
+        // Run main function to test your script.
+        WebDriver driver = new ChromeDriver();
+        try { test(driver); } 
+        catch(Exception e) { e.printStackTrace(); }
+        finally { driver.quit(); }
+    }
+
+}

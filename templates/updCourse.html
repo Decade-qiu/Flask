@@ -21,6 +21,15 @@
                     <p class="text-danger" id="error_title"></p>
                 </div>
                 <div class="form-group">
+                    <label>课程价格</label>
+                    <input class="form-control"
+                           name="price"
+                           placeholder="{{ data['price'] }}"
+                           type="text"
+                           value="{{ data['price'] }}">
+                    <p class="text-danger" id="error_price"></p>
+                </div>
+                <div class="form-group">
                     <label>课程介绍</label>
                     <textarea class="form-control"
                               placeholder="{{ data['con'] }}"

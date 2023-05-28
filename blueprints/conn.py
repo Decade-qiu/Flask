@@ -67,6 +67,7 @@ def is_mute():
         connect.commit()
     finally:
         connect.close()
+    print(f)
     return dict(
             code=f
         )

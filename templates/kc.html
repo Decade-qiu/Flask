@@ -11,14 +11,15 @@
     <div class="card">
         <div class="row no-gutters">
             <div class="col-md-4">
-                <img src="/static/uploads/{{ v.face }}" class="card-img" alt="{{ v.title }}">
+                <img src="/static/uploads/{{ v.face }}" class="card-img" alt="{{ v.title }}"
+                    style="width: 300px;height: 200px">
             </div>
             <div class="col-md-6">
                 <div class="card-body">
                     <h5 class="card-title" name="title" value="{{v.titl
                     }}">{{ v.title }}</h5>
                     <p class="card-text">主讲教师：{{ v.own }}</p>
-                    <p class="card-text">价格：1 元</p>
+                    <p class="card-text">价格：{{ data['price'] }} 元</p>
                     <p class="card-text">参加人数：{{ data['pnum'] }} 人</p>
                     {% for val in data['names'] %}
                     <p class="card-text" style="display:inline-block;">{{ val }}</p>
@@ -29,12 +30,52 @@
                 <button class="add">加入课程</button>
             </div>
         </div>
+        <hr>
         <div>
             {% if data['streamid'] != None %}
             <div class="card-header">
                 <a href="/stream/?app=undefined&name={{data['streamname']}}&id={{data['streamid']}}">最新课程教学直播间</a>
             </div>
             {% endif %}
+            {% if data['course'].own == session.get('name', '') %}
+            <form id="form-data">
+                <div class="form-group">
+                    <label for="files">课件上传</label>
+                    <input type="file" multiple id="files" name="files" multiple>
+                    <i class="fas fa-upload" id="btn-sub">提交</i>
+                </div>
+                <div class="form-group" style="display: none;">
+                    <input name="uid" value="{{ data['course'].id }}">
+                </div>
+            </form>
+            {% endif %}
+            <button id="btn-open" type="button" data-toggle="modal" data-target="#modal-files">
+                <i class="fas fa-folder-open">查看课件</i>
+            </button>
+            <div class="modal fade" id="modal-files" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
+                aria-hidden="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">课件列表</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            {% for file in data['files'] %}
+                            <div class="file-item">
+                                <div class="file-link">
+                                    <a href="\static\uploads\{{ file[1] }}" target="_blank">{{ file[0] }}</a>
+                                    <i class="fas fa-download float-right" url="\static\uploads\{{ file[1] }}"
+                                    name = "{{ file[0] }}"></i>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="card-footer">
                 <p class="card-text">{{ data['content'] }}</p>
             </div>
@@ -44,9 +85,41 @@
 {% endblock %}
 
 {% block foot %}
+<style>
+    #modal-files .modal-dialog {
+        width: 400px;
+    }
+
+    #modal-files .modal-body {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .file-item a {
+        font-size: 20px;
+    }
+
+    .file-item i {
+        font-size: 24px;
+        margin-left: 8px;
+    }
+</style>
 <script>
     $(document).ready(function () {
-        function flash(){
+        $('.file-link i').click(function (e) {
+            e.preventDefault(); // 阻止默认链接行为
+            var url = $(this).attr('url');
+            var name = $(this).attr('name');
+            console.log(url+' '+name);
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = name;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        function flash() {
             if (courseIsSelected()) {
                 var button = document.querySelector('.add');
                 button.innerText = '已加入课程';
@@ -82,6 +155,42 @@
                 }
             });
         }
+        $('#btn-sub').click(function () {
+            var fileObj = $("#files")[0].files;
+            var formData = new FormData();
+            for (var i = 0; i < fileObj.length; i++) {
+                formData.append("files", fileObj[i]);
+            }
+            formData.append('files', fileObj);
+            formData.append('uid', "{{ data['course'].id }}");
+            console.log(fileObj, formData);
+            $.ajax({
+                url: '/upkc/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: "json",
+                success: function (data) {
+                    alert(data['code']);
+                    location.reload();
+                }
+            });
+        });
+        $('#modal-files').on('show.bs.modal', function () {
+            console.log("11111");
+            var files = "{{ data['files'] }}";
+            var content = "";
+            for (var file in files) {
+                content += '<div class="file-item">';
+                content += '<i class="fas fa-download"></i> ';
+                content += '<a href="' + file + '">' + file + '</a>';
+                content += '</div>';
+            }
+            console.log(files, content);
+            $('#modal-files .modal-body').html(content);
+            // $('#modal-files').modal('show');
+        });
     });
 </script>
 {% endblock %}

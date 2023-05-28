@@ -241,3 +241,14 @@ class courseUpdForm(Form):
             DataRequired("课程介绍不能为空！")
         ]
     )
+
+    price = StringField(
+        "价格",
+        validators=[
+            DataRequired("价格不能为空！")
+        ]
+    )
+    
+    def validate_price(self, field):
+        if field.data < 0:
+            raise ValidationError("价格不能为负数！")

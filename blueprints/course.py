@@ -56,6 +56,40 @@ def mycourses():
         pagination=res
     )
 
+@bp.route('/upkc/', methods=['POST'])
+def upload():
+    upload_path = os.path.join(
+        os.path.dirname(
+            os.path.dirname(__file__)
+        ), "static/uploads"
+    )
+    files = request.files.getlist("files")
+    uid = request.form.get('uid')
+    print(files)
+    data = {'code': '上传成功！'}
+    course = None
+    connect = ORM.db()
+    try:
+        course = connect.query(Course).filter_by(id=uid).order_by(Course.createdAt.desc()).first()
+        con = json.loads(course.content)
+        fns = ""
+        con['files'] = con.get('files', '')
+        for file in files:
+            fname = file.filename
+            fname = datetime.now().strftime("%Y%m%d%H%M%S")+uuid.uuid4().hex+"&"+fname
+            file.save(os.path.join(upload_path, fname))
+            fns += fname + " "
+        con['files'] += fns
+        course.content = json.dumps(con)
+    except Exception as e:
+        connect.rollback()
+        data['code'] = e
+    else:
+        connect.commit()  
+    finally:
+        connect.close()
+    return data
+
 @bp.route("/course/update/", methods=['GET', 'POST'])
 def updcourses():
     if request.method == 'GET':
@@ -65,6 +99,7 @@ def updcourses():
         res = CRUD.find_course(request.args.get('id'))
         data['course'] = res
         data['con'] = json.loads(res.content)['info']
+        data['price'] = json.loads(res.content).get('price', '0')
         return render_template(
             "updCourse.html", data=data,
         )
@@ -80,6 +115,7 @@ def updcourses():
             course.title = form.data['title']
             con = json.loads(course.content)
             con['info'] = form.data['content']
+            con['price'] = form.data['price']
             course.content = json.dumps(con)
             course.face = form.data['face']
         except Exception as e:
@@ -101,10 +137,12 @@ def kc():
     data['course'] = res
     content = json.loads(res.content)
     data['content'] = content['info']
+    data['price'] = content.get('price', '0')
     data['names'] = content['name'].split()
     data['pnum'] = len(data['names'])
     data['streamid'] = res.streamid
-    print(res.streamid)
+    ffs = content.get('files', '').split()
+    data['files'] = [[f.split("&")[1], f] for f in ffs if f != '']
     if data['streamid'] != None:
         data['streamname'] = CRUD.find_stream(res.streamid).title
     return render_template(
