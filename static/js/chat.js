@@ -78,7 +78,7 @@ $(document).ready(function () {
     function connect() {
         disconnect();
         var transports = ["websocket"];
-        conn = new SockJS('http://' + window.location.host + '/chatroom', transports);
+        conn = new SockJS('http://' + window.location.host + '/chatroom?streamid='+id, transports);
         /*发起连接*/
         conn.onopen = function () {
             $.ajax({

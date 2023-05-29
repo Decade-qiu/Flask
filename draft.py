@@ -1,10 +1,7 @@
-import os
-import signal
-import psutil
+from datetime import datetime
 
+date_str = '20230529220922'
+datetime_obj = datetime.strptime(date_str, '%Y%m%d%H%M%S')
+formatted_date_str = datetime_obj.strftime('%Y年%m月%d日%H点%M分')
 
-connections = psutil.net_connections(kind='tcp')
-for conn in connections:
-    if conn.status == psutil.CONN_ESTABLISHED and conn.laddr.port == 1935:
-        os.kill(conn.pid, signal.SIGTERM)
-        break
+print(formatted_date_str)

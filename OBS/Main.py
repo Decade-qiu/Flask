@@ -1,12 +1,4 @@
-import datetime
-import json
-import os
-import signal
-import subprocess
-import sys
-import threading
-import psutil
-import wx
+import datetime, json, os, signal, subprocess, sys, threading, psutil, wx,av
 import wx.html2 as html2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -14,7 +6,7 @@ from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtChart import *
 os.environ['PYTHON_VLC_MODULE_PATH'] = "E://DeskTop//flask//OBS//VLC"
-import vlc
+import vlc, mss, time
 from sqlalchemy import *
 from sqlalchemy.dialects.mysql import *
 from sqlalchemy.orm import *
@@ -70,6 +62,13 @@ class Course(Base):
     face = Column(VARCHAR(100), nullable=True) 
     own = Column(VARCHAR(20), nullable=False, unique=True)  # 昵称
     streamid = Column(INTEGER)
+class Mic(Base):
+    __tablename__ = "mic"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    streamid = Column(INTEGER)
+    name = Column(VARCHAR(20))  # 昵称
+    status = Column(INTEGER, nullable=False)  # 编号
+    createdAt = Column(DATETIME, nullable=False)  # 创建时间
 SECRET_KEY = "asdfasdfjasdfjasd;lf"
 HOSTNAME = '127.0.0.1'
 PORT = '3306'
@@ -236,6 +235,9 @@ class OBS(QWidget):
         # 创建全员静音按钮并连接槽函数
         self.mute_all_button = QPushButton("全员静音")
         self.mute_all_button.clicked.connect(self.on_mute_all_button_clicked)
+        # 录屏
+        self.record_button = QPushButton("录制屏幕")
+        self.record_button.clicked.connect(self.record_screen)
         # 创建视频预览区域
         self.preview_label = QLabel("视频预览区域")
         self.preview_label.setAlignment(Qt.AlignCenter)
@@ -271,6 +273,7 @@ class OBS(QWidget):
         top_layout.addWidget(self.checkin_button)
         top_layout.addWidget(self.online_button)
         top_layout.addWidget(self.mute_all_button)
+        top_layout.addWidget(self.record_button)
         top_layout.addStretch()
         top_layout.addWidget(QLabel("OBS直播推流界面"))
         top_layout.addStretch()
@@ -508,13 +511,18 @@ class OBS(QWidget):
             self.show_checkin_dialog()
     def on_online_button_clicked(self):
         # 获取当前在线学生的人数和昵称
-        online_students = ["小明", "小红", "小刚", "小张", "小李", "小王", "小赵", "小钱", "小周", "州2"]
-        online_status = [1, -1, 1, 1, -1, 1, 1, 1, -1,-1]
+        online_students = ["小明", "小红", "小刚"]
+        online_status = [1, 1, 1]
         session = ORM.db()
         stream = session.query(Stream).filter(Stream.id==self.key).first()
         time = stream.cktAt
         persons = session.query(Check).filter(Check.key == self.key).all()
+        course = session.query(Course).filter_by(title=self.course_combo.currentText()).order_by(Course.createdAt.desc()).first()
         session.close()
+        ac_stu = json.loads(course.content)['name'].split()
+        for sss in ac_stu:
+            online_students.append(sss)
+            online_status.append(-1)
         for person in persons:
             if person.name not in online_students:
                 online_students.append(person.name)
@@ -522,10 +530,19 @@ class OBS(QWidget):
                 if person.ckt > time:
                     st = 0
                 online_status.append(st)
+            else:
+                index = online_students.index(person.name)
+                online_status[index] = 1
+                if person.ckt > time: 
+                    online_status[index] = 0
+        session = ORM.db()
+        mic = session.query(Mic).filter(Mic.streamid==self.key).all()
+        mic_on = [mic for i in mic if i.status == 1]
+        session.close()
         # 创建多行文本框和滚动区域
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        student_layouts = []
+        self.student_layouts = []
         for student, status in sorted(zip(online_students, online_status), key=lambda x: x[1], reverse=True):
             student_label = QLabel(student)
             font = QFont()
@@ -548,9 +565,21 @@ class OBS(QWidget):
             student_layout = QHBoxLayout()
             student_layout.addWidget(student_label)
             student_layout.addWidget(online_label)
-            student_layouts.append(student_layout)
+            # 添加开麦按钮并连接槽函数
+            mic_button = QPushButton()
+            mic_button.setFixedSize(50, 25)  # 设置按钮大小
+            if student in mic_on:
+                mic_button.setText("闭麦")
+                mic_button.setStyleSheet("background-color: green; color: white")
+            else:
+                mic_button.setText("开麦")
+                mic_button.setStyleSheet("background-color: gray; color: black")
+            print(student)
+            mic_button.clicked.connect(lambda _, s=student: self.turn_on_microphone(s))
+            student_layout.addWidget(mic_button)
+            self.student_layouts.append(student_layout)
         students_layout = QVBoxLayout()
-        for student_layout in student_layouts:
+        for student_layout in self.student_layouts:
             students_layout.addLayout(student_layout)
         layout.addLayout(students_layout)
         self.scroll_area = QScrollArea()
@@ -569,7 +598,49 @@ class OBS(QWidget):
             self.mute_all_button.setText("全员开启")
         else:
             self.mute_all_button.setText("全员静音")
-            
+    def turn_on_microphone(self, name):
+        session = ORM.db()
+        mics = session.query(Mic).filter(and_(Mic.streamid==self.key,
+                Mic.name==name)).order_by(Mic.createdAt.desc()).first()
+        if mics == None:
+            mics = Mic(
+                streamid=self.key,
+                name=name,
+                createdAt=dt(),
+                status=1
+            )
+            session.add(mics)
+            for layout in self.student_layouts:
+                label = layout.itemAt(0).widget()
+                button = layout.itemAt(2).widget()
+                if label.text() == name:
+                    button.setText("闭麦")
+                    button.setStyleSheet("background-color: green; color: white")
+                    break
+        else:
+            mics.status = 1-mics.status
+            for layout in self.student_layouts:
+                label = layout.itemAt(0).widget()
+                button = layout.itemAt(2).widget()
+                if label.text() == name:
+                    if mics.status == 0:
+                        button.setText("开麦")
+                        button.setStyleSheet("background-color: gray; color: black")
+                        break
+                    else:
+                        button.setText("闭麦")
+                        button.setStyleSheet("background-color: green; color: white")
+                        break
+        session.commit()
+        session.close()
+        print(name)
+    def record_screen(self):
+        import subprocess
+        cmd = ['python', 'OBS\saveVideo.py']
+        subprocess.Popen(cmd)
+
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

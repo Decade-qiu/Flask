@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import json  # 导入日期时间模块
-from model.models import Course, Post, User, Video, Msg, Stream
+from model.models import CC, Comment, Course, Post, User, Video, Msg, Stream
 from tools.orm import ORM
 from werkzeug.security import generate_password_hash  # 生成哈希密码
 import math
@@ -169,6 +169,45 @@ class CRUD:
         finally:
             connect.close()
 
+    # 保存消息
+    @staticmethod
+    def save_con(content, streamid):
+        connect = ORM.db()
+        try:
+            con = Comment(
+                content=content,
+                createdAt=dt(),
+                updatedAt=dt(),
+                courseId=streamid
+            )
+            connect.add(con)
+        except Exception as e:
+            print(e)
+            connect.rollback()
+        else:
+            connect.commit()
+        finally:
+            connect.close()
+
+    @staticmethod
+    def save_cc(content, streamid):
+        connect = ORM.db()
+        try:
+            cc = CC(
+                content=content,
+                createdAt=dt(),
+                updatedAt=dt(),
+                courseId=streamid
+            )
+            connect.add(cc)
+        except Exception as e:
+            print(e)
+            connect.rollback()
+        else:
+            connect.commit()
+        finally:
+            connect.close()
+    
     # 查询消息
     @staticmethod
     def new_msg(sid):

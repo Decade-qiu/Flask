@@ -216,7 +216,7 @@
         });
     });
     var transports = ["websocket"];
-    conn = new SockJS('http://127.0.0.1:8000/audio', transports);
+    conn = new SockJS('http://127.0.0.1:8000/audio?streamid='+$("#input_id").val(), transports);
     conn.onopen = function () {
         console.log("音频服务器连接！");
     };
@@ -234,6 +234,34 @@
             video.muted = false;
         });
     };
+    var isMic = 0;
+    setInterval(function() {
+        $.ajax({
+            url: "/micOn/",
+            type: "POST",
+            data: {
+                streamid: $("#input_id").val()
+            },
+            dataType: "json",
+            success: function (res) {
+                if (res['code'] == 1) {
+                    if (isMic == 0){
+                        alert("教师邀请你开麦！");
+                        isMic = 1;
+                        const code = "document.getElementById('btn_publish').click();";
+                        document.getElementById('iframe').contentWindow.postMessage(code, '*');
+                        conn.send("webrtc://localhost/live/livestream");
+                    }
+                }else{
+                    if (isMic == 1){
+                        isMic = 0;
+                        alert("关麦成功");
+                        location.reload();
+                    }
+                }
+            }
+        });
+    }, 1000);
     document.querySelector('#record').onclick = recordSound;
     document.querySelector('#stop').onclick = stopRecord;
     function recordSound() {
@@ -251,14 +279,30 @@
                     console.log("开始录音");
                     const code = "document.getElementById('btn_publish').click();";
                     document.getElementById('iframe').contentWindow.postMessage(code, '*');
-                    conn.send("webrtc://localhost/live/livestream");
+                    var message = {url: 'webrtc://localhost/live/livestream', sid: $('#input_id').val()};
+                    conn.send(JSON.stringify(message));
                 }
             }
         });
     }
     function stopRecord() {
-        alert("关麦成功");
-        location.reload();
+        $.ajax({
+            url: "/micOff/",
+            type: "POST",
+            data: {
+                streamid: $("#input_id").val()
+            },
+            dataType: "json",
+            success: function (res) {
+                isMic = 0;
+                alert("关麦成功");
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.error("请求失败：" + error);
+                alert("关麦失败，请稍后再试！");
+            }  
+        });
     }
 </script>
 <!-- <script>

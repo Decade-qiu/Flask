@@ -7,22 +7,30 @@ from model.CRUD import CRUD
 
 
 class ChatRoomHandler(SockJSConnection):
-    waiters = set()
+    # waiters = set()
+    dic = dict()
     def on_open(self, request):
-        self.waiters.add(self)
+        room = int(request.arguments.get('streamid', '')[0], 10)
+        if room not in self.dic:
+            self.dic[room] = set()
+        self.dic[room].add(self)
+       
     def on_message(self, message):
         try:
             data = json.loads(message)
             streamid = data.get('streamid', '')
+            print(streamid)
             data['dt'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             content = json.dumps(data)
             if data['code'] == 2:
                 CRUD.save_msg(content, streamid)
-            self.broadcast(self.waiters, content)
+            if streamid != '':
+                self.broadcast(self.dic[int(streamid)], content)
         except Exception as e:
-            print(e)
+            print(e, "11111")
     def on_close(self):
-        self.waiters.remove(self)
+        # self.dic[room].remove(self)
+        pass
 
 class CanvasConnection(SockJSConnection):
     clients = set()
@@ -36,21 +44,75 @@ class CanvasConnection(SockJSConnection):
         self.clients.remove(self)
 
 class AudioHandler(SockJSConnection):   
-
-    connections = set()
-
+    dic = dict()
     def on_open(self, info):
-        self.connections.add(self)
-        print("open-audio")
+        room = int(info.arguments.get('streamid', '')[0], 10)
+        if room not in self.dic:
+            self.dic[room] = set()
+        print(room)
+        self.dic[room].add(self)
 
     def on_message(self, message):
-        print(message)
-        for conn in self.connections:
-            conn.send(message)
+        print(type(message), message)
+        data = json.loads(message)
+        uid = data['sid']
+        url = data['url']
+        for conn in self.dic[int(uid)]:
+            conn.send(url)
 
     def on_close(self):
-        self.connections.remove(self)
-        print("close-audio")
+        pass
+
+class CommentHandler(SockJSConnection):
+    # waiters = set()
+    dic = dict()
+    def on_open(self, request):
+        room = int(request.arguments.get('courseid', '')[0], 10)
+        if room not in self.dic:
+            self.dic[room] = set()
+        self.dic[room].add(self)
+       
+    def on_message(self, message):
+        try:
+            data = json.loads(message)
+            streamid = data.get('streamid', '')
+            data['dt'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            content = json.dumps(data)
+            if data['code'] == 2:
+                CRUD.save_con(content, streamid)
+            if streamid != '':
+                self.broadcast(self.dic[int(streamid)], content)
+        except Exception as e:
+            print(e, "11111")
+    def on_close(self):
+        # self.dic[room].remove(self)
+        pass
+
+class CCHandler(SockJSConnection):
+    # waiters = set()
+    dic = dict()
+    def on_open(self, request):
+        room = int(request.arguments.get('courseid', '')[0], 10)
+        if room not in self.dic:
+            self.dic[room] = set()
+        self.dic[room].add(self)
+       
+    def on_message(self, message):
+        try:
+            data = json.loads(message)
+            streamid = data.get('courseid', '')
+            data['dt'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            content = json.dumps(data)
+            if data['code'] == 2:
+                CRUD.save_cc(content, streamid)
+            if streamid != '':
+                self.broadcast(self.dic[int(streamid)], content)
+        except Exception as e:
+            print(e, "11111")
+    def on_close(self):
+        # self.dic[room].remove(self)
+        pass
+
 
 class checkHandler(SockJSConnection):   
 

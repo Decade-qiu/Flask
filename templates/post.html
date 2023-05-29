@@ -1,5 +1,17 @@
 {% extends "layout.html" %}
-
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static',filename='dplayer/DPlayer.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCoreDefault.css') }}">
+<script src="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCore.js') }}"></script>
+<script src="{{ url_for('static',filename='dplayer/DPlayer.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.all.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/lang/zh-cn/zh-cn.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdn.bootcss.com/flv.js/1.4.0/flv.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+<script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+{% endblock %}
 {% block content %}
 <div class="col-md-10 pad-right">
     <div class="card">
@@ -14,7 +26,49 @@
             <div class="post-content">{{ post['content'] }}</div>
         </div>
     </div>
-    <dic class="card-body">
+    <div class="col-md-12">
+        <div class="card" id="chat-card" style="max-height: 300px; overflow-y: auto;">
+            <div class="card-header">评论区</div>
+            <div class="card-body" id="chat-list">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form id="form-data">
+                    <div class="media">
+                        <input type="hidden" name="streamid" id="input_id" value="{{ post['id'] }}">
+                        {% if session.get('name', '') %}
+                        <img class="mr-3"
+                            src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
+                            style="width: 60px;height: 60px;">
+                        {% else %}
+                        <img class="mr-3" src="{{ url_for('static', filename='images/male.png') }}"
+                            style="width: 60px;height: 60px;">
+                        {% endif %}
+                        <div class="media-body">
+                            <h6>{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客 <a
+                                    href="/login/">[登录]</a> <a href="/regist/">[注册]</a>{% endif %}</h6>
+                            <textarea name="content" id="editor" style="width: 100%;"></textarea>
+                            <input type="hidden" name="name" id="input_name"
+                                value="{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客{% endif %}">
+                            {% if session.get('name', '') %}
+                            <input type="hidden" name="face" id="input_face"
+                                value="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}">
+                            {% else %}
+                            <input type="hidden" name="face" id="input_face"
+                                value="{{ url_for('static', filename='images/male.png') }}">
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+                <a style="margin-top: 12px;" id="send_msg" class="btn btn-success float-right"
+                    href="javascript:void(0)">发送消息</a>
+            </div>
+        </div>
+    </div>
+    <!-- <dic class="card-body">
         <script src="https://utteranc.es/client.js"
         repo="Decade-qiu/Decade-qiu.github.io"
         issue-term="url"
@@ -23,7 +77,7 @@
         crossorigin="anonymous"
         async>
 </script>
-    </dic>
+    </dic> -->
 </div>
 
 
@@ -34,6 +88,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/mode/markdown/markdown.min.js"></script>
 <script src="https://cdn.bootcss.com/marked/0.8.1/marked.min.js"></script>
 <script>
+    var ue = UE.getEditor('editor', {
+        toolbars: [
+            ['fullscreen', 'emotion', 'insertcode', 'preview']
+        ]
+    });
     // 使用 Highlight.js 对代码块进行语法高亮
     document.querySelectorAll('pre code').forEach((block) => {
         hljs.highlightBlock(block);
@@ -47,6 +106,7 @@
         $('.post-info').append('<a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>');
     });
 </script>
+<script src="{{ url_for('static',filename='js/comment.js') }}"></script>
 <script>
     $(document).ready(function () {
         $('.t-nav-link').click(function (event) {

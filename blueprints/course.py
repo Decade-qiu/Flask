@@ -90,6 +90,41 @@ def upload():
         connect.close()
     return data
 
+@bp.route('/upvideo/', methods=['POST'])
+def uploadvv():
+    upload_path = os.path.join(
+        os.path.dirname(
+            os.path.dirname(__file__)
+        ), "static/uploads"
+    )
+    files = request.files.getlist("files")
+    uid = request.form.get('uid')
+    print(files)
+    data = {'code': '上传成功！'}
+    course = None
+    connect = ORM.db()
+    try:
+        course = connect.query(Course).filter_by(id=uid).order_by(Course.createdAt.desc()).first()
+        con = json.loads(course.content)
+        fns = ""
+        con['videos'] = con.get('videos', '')
+        for file in files:
+            fname = file.filename
+            dt = datetime.now().strftime("%Y%m%d%H%M%S")
+            fname = dt+"@"+uuid.uuid4().hex+"&"+fname
+            file.save(os.path.join(upload_path, fname))
+            fns += fname + " "
+        con['videos'] += fns
+        course.content = json.dumps(con)
+    except Exception as e:
+        connect.rollback()
+        data['code'] = e
+    else:
+        connect.commit()  
+    finally:
+        connect.close()
+    return data
+
 @bp.route("/course/update/", methods=['GET', 'POST'])
 def updcourses():
     if request.method == 'GET':
@@ -128,6 +163,10 @@ def updcourses():
             connect.close()
         return data   
 
+def ccc(s):
+    datetime_obj = datetime.strptime(s, '%Y%m%d%H%M%S')
+    return datetime_obj.strftime('%Y年%m月%d日%H点%M分')
+
 @bp.route("/kc/", methods=['GET'])
 def kc():
     data = dict(
@@ -143,6 +182,7 @@ def kc():
     data['streamid'] = res.streamid
     ffs = content.get('files', '').split()
     data['files'] = [[f.split("&")[1], f] for f in ffs if f != '']
+    data['videos'] = [[f.split("&")[1], ccc(f.split("@")[0]), f] for f in content.get('videos', '').split() if f != '']
     if data['streamid'] != None:
         data['streamname'] = CRUD.find_stream(res.streamid).title
     return render_template(

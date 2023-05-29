@@ -83,3 +83,27 @@ class Course(Base):
     face = Column(VARCHAR(100), nullable=True) 
     own = Column(VARCHAR(20), nullable=False, unique=True)  # 昵称
     streamid = Column(INTEGER)
+
+class Mic(Base):
+    __tablename__ = "mic"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    streamid = Column(INTEGER)
+    name = Column(VARCHAR(20))  # 昵称
+    status = Column(INTEGER, nullable=False)  # 编号
+    createdAt = Column(DATETIME, nullable=False)  # 创建时间
+
+class Comment(Base):
+    __tablename__ = "comment"
+    id = Column(BIGINT, primary_key=True)  # 编号
+    content = Column(TEXT)  # 消息
+    courseId = Column(INTEGER)
+    createdAt = Column(DATETIME, nullable=False)  # 创建时间
+    updatedAt = Column(DATETIME, nullable=False)  # 修改时间
+
+class CC(Base):
+    __tablename__ = "cc"
+    id = Column(BIGINT, primary_key=True)  # 编号
+    content = Column(TEXT)  # 消息
+    courseId = Column(INTEGER)
+    createdAt = Column(DATETIME, nullable=False)  # 创建时间
+    updatedAt = Column(DATETIME, nullable=False)  # 修改时间

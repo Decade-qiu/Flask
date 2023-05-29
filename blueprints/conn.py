@@ -11,7 +11,8 @@ from tools.decorators import is_login
 from tools.forms import *
 from model.models import *
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from sqlalchemy import *
+from sqlalchemy.dialects.mysql import *
 from tools.orm import ORM
 
 bp = Blueprint("conn", __name__)
@@ -68,6 +69,46 @@ def is_mute():
     finally:
         connect.close()
     print(f)
+    return dict(
+            code=f
+        )
+
+@bp.route("/micOn/", methods=['POST'])
+def is_mic():
+    key = request.form.get('streamid')
+    name = session.get('name', '')
+    f = 0
+    connect = ORM.db()
+    try:
+        mics = connect.query(Mic).filter(and_(Mic.streamid==key,
+                Mic.name==name)).order_by(Mic.createdAt.desc()).first()
+        f = mics.status
+    except Exception as e:
+        connect.rollback()
+    else:
+        connect.commit()
+    finally:
+        connect.close()
+    return dict(
+            code=f
+        )
+
+@bp.route("/micOff/", methods=['POST'])
+def is_micOff():
+    key = request.form.get('streamid')
+    name = session.get('name')
+    f = 0
+    connect = ORM.db()
+    try:
+        mics = connect.query(Mic).filter(and_(Mic.streamid==key,
+                Mic.name==name)).order_by(Mic.createdAt.desc()).first()
+        mics.status = 0
+    except Exception as e:
+        connect.rollback()
+    else:
+        connect.commit()
+    finally:
+        connect.close()
     return dict(
             code=f
         )

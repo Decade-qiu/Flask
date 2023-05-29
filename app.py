@@ -1,7 +1,7 @@
 import datetime
 from blueprints.conn import bp as conn
 from blueprints.discuss import bp as discuss
-from blueprints.sockjs import ChatRoomHandler,CanvasConnection as BoardHandler, AudioHandler, checkHandler
+from blueprints.sockjs import CCHandler, ChatRoomHandler,CanvasConnection as BoardHandler, AudioHandler, CommentHandler, checkHandler
 import tornado.ioloop
 import tornado.web
 from tornado.web import Application, FallbackHandler
@@ -56,9 +56,11 @@ if __name__ == '__main__':
     BoardRouter = sockjs.tornado.SockJSRouter(BoardHandler, '/board')
     AudioRouter = sockjs.tornado.SockJSRouter(AudioHandler, '/audio')
     checkRouter = sockjs.tornado.SockJSRouter(checkHandler, '/check')
+    commenRouter = sockjs.tornado.SockJSRouter(CommentHandler, '/comment')
+    ccRouter = sockjs.tornado.SockJSRouter(CCHandler, '/cc')
     wsgi_app = WSGIContainer(app)
     application = tornado.web.Application(
-        ChatRouter.urls + BoardRouter.urls + AudioRouter.urls + checkRouter.urls +[(r'.*', FallbackHandler, dict(fallback=wsgi_app))]
+        ChatRouter.urls + BoardRouter.urls + AudioRouter.urls + checkRouter.urls + commenRouter.urls + ccRouter.urls + [(r'.*', FallbackHandler, dict(fallback=wsgi_app))]
     )
     application.listen(8000, address=IP)
     tornado.ioloop.IOLoop.instance().start()

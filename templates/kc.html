@@ -1,5 +1,18 @@
 {%import 'page.html' as pg%}
 {% extends "layout.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static',filename='dplayer/DPlayer.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCoreDefault.css') }}">
+<script src="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCore.js') }}"></script>
+<script src="{{ url_for('static',filename='dplayer/DPlayer.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.all.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/lang/zh-cn/zh-cn.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdn.bootcss.com/flv.js/1.4.0/flv.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+<script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+{% endblock %}
 {% block content %}
 <div class="col-md-10 pad-right">
     <nav aria-label="breadcrumb">
@@ -33,8 +46,9 @@
         <hr>
         <div>
             {% if data['streamid'] != None %}
-            <div class="card-header">
-                <a href="/stream/?app=undefined&name={{data['streamname']}}&id={{data['streamid']}}">最新课程教学直播间</a>
+            <div class="card">
+                <span style="color:red">
+                    <a href="/stream/?app=undefined&name={{data['streamname']}}&id={{data['streamid']}}" >最新课程教学直播间</a></span>
             </div>
             {% endif %}
             {% if data['course'].own == session.get('name', '') %}
@@ -42,7 +56,17 @@
                 <div class="form-group">
                     <label for="files">课件上传</label>
                     <input type="file" multiple id="files" name="files" multiple>
-                    <i class="fas fa-upload" id="btn-sub">提交</i>
+                    <i class="fas fa-upload" id="btn-sub-file">提交</i>
+                </div>
+                <div class="form-group" style="display: none;">
+                    <input name="uid" value="{{ data['course'].id }}">
+                </div>
+            </form>
+            <form id="video-data">
+                <div class="form-group">
+                    <label for="vfiles">录像上传</label>
+                    <input type="file" multiple id="vfiles" name="files" multiple>
+                    <i class="fas fa-upload" id="btn-sub-video">提交</i>
                 </div>
                 <div class="form-group" style="display: none;">
                     <input name="uid" value="{{ data['course'].id }}">
@@ -51,6 +75,9 @@
             {% endif %}
             <button id="btn-open" type="button" data-toggle="modal" data-target="#modal-files">
                 <i class="fas fa-folder-open">查看课件</i>
+            </button>
+            <button id="btn-video" type="button" data-toggle="modal" data-target="#modal-videos">
+                <i class="fas fa-folder-open">查看录像</i>
             </button>
             <div class="modal fade" id="modal-files" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
                 aria-hidden="false">
@@ -68,7 +95,37 @@
                                 <div class="file-link">
                                     <a href="\static\uploads\{{ file[1] }}" target="_blank">{{ file[0] }}</a>
                                     <i class="fas fa-download float-right" url="\static\uploads\{{ file[1] }}"
-                                    name = "{{ file[0] }}"></i>
+                                        name="{{ file[0] }}"></i>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="modal-videos" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
+                aria-hidden="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">录像名称</h5>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <h5 class="modal-title">录像时间</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            {% for file in data['videos'] %}
+                            <div class="file-item">
+                                <div class="video-link">
+                                    <a href="\static\uploads\{{ file[2] }}" ">{{ file[0] }}</a>
+                                    <a href="/">
+                                        <i class="fas fa-arrow-alt-circle-right"></i>
+                                      </a>
+                                    <i class="fa fa-calendar-times-o float-right">{{ file[1] }}</i>
                                 </div>
                             </div>
                             {% endfor %}
@@ -77,7 +134,53 @@
                 </div>
             </div>
             <div class="card-footer">
-                <p class="card-text">{{ data['content'] }}</p>
+                <button class="btn btn-info" id="intro-button">课程简介</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <button class="btn btn-info" id="review-button">课程评价</button>
+                <hr>
+                <p class="card-text con">{{ data['content'] }}</p>
+                <div class="col-md-12 inr1" style="display: none;">
+                    <div class="card" id="chat-card" style="max-height: 300px; overflow-y: auto;">
+                        <div class="card-header">评论区</div>
+                        <div class="card-body" id="chat-list">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 inr2" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="com-form-data">
+                                <div class="media">
+                                    <input type="hidden" name="courseid" id="input_id" value="{{ data['course'].id }}">
+                                    {% if session.get('name', '') %}
+                                    <img class="mr-3"
+                                        src="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}"
+                                        style="width: 60px;height: 60px;">
+                                    {% else %}
+                                    <img class="mr-3" src="{{ url_for('static', filename='images/male.png') }}"
+                                        style="width: 60px;height: 60px;">
+                                    {% endif %}
+                                    <div class="media-body">
+                                        <h6>{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客 <a
+                                                href="/login/">[登录]</a> <a href="/regist/">[注册]</a>{% endif %}</h6>
+                                        <textarea name="content" id="editor" style="width: 100%;"></textarea>
+                                        <input type="hidden" name="name" id="input_name"
+                                            value="{% if session.get('name', '') %}{{ session.get('name', '') }}{% else %}游客{% endif %}">
+                                        {% if session.get('name', '') %}
+                                        <input type="hidden" name="face" id="input_face"
+                                            value="{% if session.get('face', '') %}/static/uploads/{{ session.get('face', '') }}{% else %}{{ url_for('static', filename='images/male.png') }}{% endif %}">
+                                        {% else %}
+                                        <input type="hidden" name="face" id="input_face"
+                                            value="{{ url_for('static', filename='images/male.png') }}">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </form>
+                            <a style="margin-top: 12px;" id="send_msg" class="btn btn-success float-right"
+                                href="javascript:void(0)">发送消息</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -89,16 +192,13 @@
     #modal-files .modal-dialog {
         width: 400px;
     }
-
     #modal-files .modal-body {
         max-height: 400px;
         overflow-y: auto;
     }
-
     .file-item a {
         font-size: 20px;
     }
-
     .file-item i {
         font-size: 24px;
         margin-left: 8px;
@@ -106,11 +206,143 @@
 </style>
 <script>
     $(document).ready(function () {
+        var ue = UE.getEditor('editor', {
+            toolbars: [
+                ['fullscreen', 'emotion', 'insertcode', 'preview']
+            ]
+        });
+        var conn = null;
+        var name = $("#input_name").val();
+        var face = $("#input_face").val();
+        var id = $("#input_id").val();
+        function append_msg(name, data) {
+            var html = "";
+            if (data.code == 2) {
+                /*判断用户，是自己还是别人*/
+                if (data.name == name) {
+                    // data.JSON();
+                    //自己
+                    html += "<div class=\"row\">\n" +
+                        "                        <div class=\"col-md-3\"></div>\n" +
+                        "                        <div class=\"col-md-9\">\n" +
+                        "                            <div class=\"media\">\n" +
+                        "                                <div class=\"media-body\">\n" +
+                        "                                    <h6 class=\"user-nickname text-right\">" + data.name + "[" + data.dt + "]</h6>\n" +
+                        "                                    <div class=\"alert alert-success\" role=\"alert\">\n" +
+                        "                                        " + data.content + "\n" +
+                        "                                    </div>\n" +
+                        "                                </div>\n" +
+                        "                                <img class=\"ml-3 rounded-circle\" src=\"" + data.face + "\" style='width:60px;height: 60px;'>\n" +
+                        "                            </div>\n" +
+                        "                        </div>\n" +
+                        "                    </div>";
+                } else {
+                    //别人
+                    html += "<div class=\"row\">\n" +
+                        "                        <div class=\"col-md-9\">\n" +
+                        "                            <div class=\"media\">\n" +
+                        "                                <img class=\"mr-3 rounded-circle\" src=\"" + data.face + "\" style='width: 60px;height: 60px;'>\n" +
+                        "                                <div class=\"media-body\">\n" +
+                        "                                    <h6 class=\"user-nickname\">" + data.name + "[" + data.dt + "]</h6>\n" +
+                        "                                    <div class=\"alert alert-info\" role=\"alert\">\n" +
+                        "                                        " + data.content + "\n" +
+                        "                                    </div>\n" +
+                        "                                </div>\n" +
+                        "                            </div>\n" +
+                        "                        </div>\n" +
+                        "                        <div class=\"col-md-3\"></div>\n" +
+                        "                    </div>";
+                }
+                $("#chat-list").append(html);
+                SyntaxHighlighter.highlight();
+                $("#chat-list").scrollTop(
+                    $("#chat-list").scrollTop() + 99999999
+                );
+            } else {
+                $("#chat-list").append("<p class='text-center text-success'>欢迎" + data.name + "进入房间！<img src='/static/images/rorse.gif'><img src='/static/images/rorse.gif'><img src='/static/images/rorse.gif'></p>");
+            }
+        }
+        function update_ui(event) {
+            var recv_msg = event.data;
+            append_msg(name, JSON.parse(recv_msg))
+        }
+        function user_enter_tip() {
+            var enter_data = {
+                code: 1,
+                name: name
+            };
+            conn.send(JSON.stringify(enter_data))
+        }
+        function connect() {
+            disconnect();
+            var transports = ["websocket"];
+            conn = new SockJS('http://' + window.location.host + '/cc?courseid=' + id, transports);
+            /*发起连接*/
+            conn.onopen = function () {
+                $.ajax({
+                    url: "/kcpj/",
+                    type: "POST",
+                    data: { courseid: id },
+                    dataType: "json",
+                    success: function (res) {
+                        var msg_arr = res.data;
+                        for (var k in msg_arr) {
+                            append_msg(name, msg_arr[k])
+                            // console.log(name, msg_arr[k].name, msg_arr[k].content)
+                        }
+                        /*加载完所有的消息，再来进入房间*/
+                        user_enter_tip();
+                    }
+                });
+                console.log("发起连接！");
+            };
+            /*接受消息*/
+            conn.onmessage = function (event) {
+                //console.log(event);
+                update_ui(event);
+            };
+            /*断开连接*/
+            conn.onclose = function () {
+                console.log("断开连接！");
+                conn = null;
+            };
+        }
+        function disconnect() {
+            if (conn != null) {
+                conn.close();//断开
+                conn = null;
+            }
+        }
+        if (conn == null) {
+            connect()
+        } else {
+            disconnect();
+        }
+        function getFormData() {
+            var data = $("#com-form-data").serializeArray();
+            var result = {};
+            $.map(data, function (v, i) {
+                result[v['name']] = v['value'];
+            });
+            return result;
+        }
+        $("#send_msg").click(function () {
+            var msg = getFormData();
+            console.log(msg.uid);
+            if (msg.content) {
+                msg.code = 2;
+                ue.setContent('');
+                console.log(msg);
+                conn.send(JSON.stringify(msg)); //发送
+            } else {
+                alert("发送消息不能为空！");
+            }
+        });
         $('.file-link i').click(function (e) {
             e.preventDefault(); // 阻止默认链接行为
             var url = $(this).attr('url');
             var name = $(this).attr('name');
-            console.log(url+' '+name);
+            console.log(url + ' ' + name);
             var link = document.createElement('a');
             link.href = url;
             link.download = name;
@@ -155,8 +387,12 @@
                 }
             });
         }
-        $('#btn-sub').click(function () {
+        $('#btn-sub-file').click(function () {
             var fileObj = $("#files")[0].files;
+            if (fileObj.length == 0) {
+                alert("请选择文件！");
+                return;
+            }
             var formData = new FormData();
             for (var i = 0; i < fileObj.length; i++) {
                 formData.append("files", fileObj[i]);
@@ -177,20 +413,50 @@
                 }
             });
         });
-        $('#modal-files').on('show.bs.modal', function () {
-            console.log("11111");
-            var files = "{{ data['files'] }}";
-            var content = "";
-            for (var file in files) {
-                content += '<div class="file-item">';
-                content += '<i class="fas fa-download"></i> ';
-                content += '<a href="' + file + '">' + file + '</a>';
-                content += '</div>';
+        $('#btn-sub-video').click(function () {
+            var fileObj = $("#vfiles")[0].files;
+            if (fileObj.length == 0) {
+                alert("请选择文件！");
+                return;
             }
-            console.log(files, content);
-            $('#modal-files .modal-body').html(content);
-            // $('#modal-files').modal('show');
+            var formData = new FormData();
+            for (var i = 0; i < fileObj.length; i++) {
+                formData.append("files", fileObj[i]);
+            }
+            formData.append('files', fileObj);
+            formData.append('uid', "{{ data['course'].id }}");
+            console.log(fileObj, formData);
+            $.ajax({
+                url: '/upvideo/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: "json",
+                success: function (data) {
+                    alert(data['code']);
+                    location.reload();
+                }
+            });
+        });
+        const introButton = document.getElementById('intro-button');
+        const reviewButton = document.getElementById('review-button');
+        const introContent = document.querySelector('.card-footer .con');
+        const r1 = document.querySelector('.card-footer .inr1');
+        const r2 = document.querySelector('.card-footer .inr2');
+        introButton.addEventListener('click', () => {
+            introContent.style.display = 'block';
+            r1.style.display = 'none';
+            r2.style.display = 'none';
+        });
+        reviewButton.addEventListener('click', () => {
+            introContent.style.display = 'none';
+            r1.style.display = 'block';
+            r2.style.display = 'block';
         });
     });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/mode/markdown/markdown.min.js"></script>
+<script src="https://cdn.bootcss.com/marked/0.8.1/marked.min.js"></script>
 {% endblock %}

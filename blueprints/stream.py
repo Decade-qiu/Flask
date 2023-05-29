@@ -21,7 +21,7 @@ def stream():
             title="Stream"
         )
         name = request.args.get('name', '')
-        streamid = request.args.get ('id', '')
+        streamid = request.args.get('id', '')
         data['name'] = name
         data['streamid'] = streamid
         return render_template("stream.html", data=data)
