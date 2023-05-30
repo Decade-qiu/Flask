@@ -16,10 +16,15 @@ bp = Blueprint("playchat", __name__)
 
 @bp.route("/playchat/", methods=['GET'])
 def playchat():
-    vid = request.args.get('id', None)
-    if vid:
-        data = dict(
-            title="弹幕视频"
-        )
-        data['video'] = CRUD.video(vid)
-        return render_template("playchat.html", data=data)
+    courseid = request.args.get('courseId', None)
+    videoid = request.args.get('videoId', None)
+    url = request.args.get('url', None)
+    videoname = request.args.get('videoname', None)
+    data = dict(
+        title="弹幕视频",
+        name=videoname,
+        videoid=videoid+courseid,
+        url=url
+    )
+    print(data)
+    return render_template("playchat.html", data=data)

@@ -111,7 +111,7 @@ def uploadvv():
         for file in files:
             fname = file.filename
             dt = datetime.now().strftime("%Y%m%d%H%M%S")
-            fname = dt+"@"+uuid.uuid4().hex+"&"+fname
+            fname = dt+"@"+uuid.uuid4().hex+"@"+fname
             file.save(os.path.join(upload_path, fname))
             fns += fname + " "
         con['videos'] += fns
@@ -181,8 +181,9 @@ def kc():
     data['pnum'] = len(data['names'])
     data['streamid'] = res.streamid
     ffs = content.get('files', '').split()
-    data['files'] = [[f.split("&")[1], f] for f in ffs if f != '']
-    data['videos'] = [[f.split("&")[1], ccc(f.split("@")[0]), f] for f in content.get('videos', '').split() if f != '']
+    # print(ffs, content.get('videos', '').split())
+    data['files'] = [[f.split("&")[1], f] for f in ffs if f != ''][::-1]
+    data['videos'] = [[f.split("@")[2], ccc(f.split("@")[0]), f, f.split("@")[0]] for f in content.get('videos', '').split() if f != ''][::-1]
     if data['streamid'] != None:
         data['streamname'] = CRUD.find_stream(res.streamid).title
     return render_template(
