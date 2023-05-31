@@ -15,6 +15,14 @@ bp = Blueprint("main", __name__)
 @bp.route("/", methods=['GET'])
 def main():
     data = dict(
-        title="Decade"
+        title="首页",
     )
-    return render_template("main.html", data=data)
+    page = request.args.get('page', 1)
+    res = CRUD.show_course('all_1mqnabzvxc', int(page))
+    # 打乱res
+    random.shuffle(res.items)
+    data['course'] = res.items
+    return render_template(
+        "courses.html", data=data,
+        pagination=res
+    )
