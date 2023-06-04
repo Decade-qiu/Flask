@@ -33,14 +33,27 @@
             -moz-border-radius: 0;
             border-radius: 0;
         }
+
         /* 设置 video 元素的样式 */
         #main {
             padding-top: 70px;
             margin: 0 auto;
             position: relative;
         }
+
         .jswebrtc {
             height: 140px;
+        }
+
+        .badge {
+            position: relative;
+            top: -32px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            font-size: 12px;
+            padding: 3px 6px;
+            border-radius: 50%;
         }
     </style>
     {% block head %}{% endblock %}
@@ -56,10 +69,10 @@
                 <a class="nav-link active" href="#" style="font-size: 16px;">首页</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" style="font-size: 16px;">直播</a>
+                <a class="nav-link" href="#" style="font-size: 16px;"></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" style="font-size: 16px;">课程分类</a>
+                <a class="nav-link" href="#" style="font-size: 16px;"></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/discuss/" style="font-size: 16px;">讨论区</a>
@@ -77,24 +90,18 @@
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div style="position: relative;">
             <i class="fa fa-bell-o" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
-            <span style="color:white;font-size: 1px;">消息</span>
-        </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div>
-            <i class="fa fa-cloud-download" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
-            <span style="color:white;font-size: 1px;">下载</span>
-        </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div>
-            <i class="fa fa-shopping-cart" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
-            <span style="color:white;font-size: 1px;">购买</span>
-        </div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div>
-            <i class="fa fa-history" style="color:white; font-size: x-large; display: block;margin: auto;"></i>
-            <span style="color:white;font-size: 1px;">历史</span>
+            <span class="onmess" style="color:white;font-size: 1px;">消息</span>
+            <span class="badge">
+            </span>
         </div>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <form class="form-inline collapse navbar-collapse justify-content-right">
@@ -124,7 +131,7 @@
                     </div>
                 </div>
                 <div class="card rtc" style="display: none;">
-                    <div class="jswebrtc" data-url="webrtc://localhost/live/livestream" ></div>
+                    <div class="jswebrtc" data-url="webrtc://localhost/live/livestream"></div>
                 </div>
                 <div class="card">
                     <div class="card-header">
@@ -136,7 +143,7 @@
                                 onclick="window.location.href='/build/'">课程创建</button>
                             <br>
                             <button type="button" class="btn btn-info"
-                                onclick="window.location.href='/myStream/'">我的直播信息</button>
+                                onclick="window.location.href='/data/'">学习数据统计</button>
                             <br>
                             <button type="button" class="btn btn-info"
                                 onclick="window.location.href='/mykc/'">我的课程信息</button>
@@ -241,6 +248,27 @@
             $("#btn-search").click(function () {
                 var q = $("#input_q").val();
                 location.href = "/?q=" + q
+            });
+            updateBadge();
+            setInterval(updateBadge, 5000);
+            function updateBadge() {
+                $.ajax({
+                    url: '/message/',
+                    method: 'POST',
+                    success: function (response) {
+                        var badge = $('.badge');
+                        var count = response['count'];
+                        if (count > 0) {
+                            badge.text(count);
+                            badge.show();
+                        } else {
+                            badge.hide();
+                        }
+                    }
+                });
+            }
+            $(".onmess").click(function () {
+                location.href = '/clear/';
             });
         });
     </script>

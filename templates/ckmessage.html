@@ -4,42 +4,27 @@
 <div class="col-md-10 pad-right">
     <div class="card">
         <div class="card-header">
-            我的直播信息
+            我的消息
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <a class="btn btn-primary" href="/build/" id="btn-sub">创建直播</a>
         </div>
         <div class="card-body">
             <ul class="list-group">
-                <li class="list-group-item">
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-md-4">
-                                直播标题
-                            </div>
-                            <div class="col-md-4">
-                                开播时间
-                            </div>
-                        </div>
-                    </div>
-                </li>
-                {% set v = data['stream'] %}
+                {% set v = data['mess'] %}
                 {% for val in v %}
                 <li class="list-group-item">
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-4">
-                                {{ val.title }}
+                                {{ val[0] }} 开播拉！速去上课！
                             </div>
                             <div class="col-md-4">
-                                {{ val.createdAt }}
+                                {{ val[1] }}
                             </div>
                             <div class="col-md-4">
-                                <a class="btn btn-info stream"
-                                >修改</a>
-                                <a class="btn btn-success stream"
-                                    urlId="{{ val.url }}"
-                                    streamId="{{ val.id }}">
-                                进入</a>
+                                {% if val[2] %}
+                                    <span class="xbadge">**</span>
+                                {% else %}
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -47,15 +32,24 @@
                 {% endfor %}
             </ul>
             <br>
-            <div class="form-group">
-                {{pg.my_paginate(pagination,'myStream.myStream')}}
-            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block foot %}
+<style>
+    .xbadge {
+        position: relative;
+        top: -0px;
+        right: -10px;
+        background-color: red;
+        color: white;
+        font-size: 15px;
+        padding: 3px 6px;
+        border-radius: 100%;
+    }
+</style>
 <script src="{{ url_for('static', filename='js/request.js') }}"></script>
 <script>
     $(document).ready(function () {

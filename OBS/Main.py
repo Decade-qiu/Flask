@@ -69,6 +69,14 @@ class Mic(Base):
     name = Column(VARCHAR(20))  # 昵称
     status = Column(INTEGER, nullable=False)  # 编号
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
+class Message(Base):
+    __tablename__ = "message"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    key = Column(INTEGER, nullable=False)  
+    name = Column(VARCHAR(20), nullable=False) 
+    title = Column(VARCHAR(20), nullable=False) 
+    created = Column(DATETIME, nullable=False)  # 修改时间
+    isr = Column(INTEGER, nullable=False)  
 SECRET_KEY = "asdfasdfjasdfjasd;lf"
 HOSTNAME = '127.0.0.1'
 PORT = '3306'
@@ -414,6 +422,18 @@ class OBS(QWidget):
         session = ORM.db()
         sss = session.query(Stream).filter(Stream.title == self.stream_key_edit.text()).first()
         self.streamid = sss.id
+        cou = session.query(Course).filter(Course.title==self.course_combo.currentText()).order_by(Course.createdAt.desc()).first()
+        con = json.loads(cou.content)
+        nss = con['name'].split()
+        for nn in nss:
+            mess = Message(
+                name=nn,
+                key=self.streamid,
+                title=self.stream_key_edit.text(),
+                isr=1,
+                created=dt()
+            )
+            session.add(mess)
         session.commit()
         session.close()
         session = ORM.db()

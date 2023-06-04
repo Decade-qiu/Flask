@@ -74,6 +74,15 @@ class Check(Base):
     name = Column(VARCHAR(20), nullable=False, unique=True) 
     ckt = Column(DATETIME, nullable=False)  # 修改时间
 
+class Message(Base):
+    __tablename__ = "message"
+    id = Column(INTEGER, primary_key=True)  # 编号
+    key = Column(INTEGER, nullable=False)  
+    name = Column(VARCHAR(20), nullable=False) 
+    title = Column(VARCHAR(20), nullable=False) 
+    created = Column(DATETIME, nullable=False)  # 修改时间
+    isr = Column(INTEGER, nullable=False)  
+
 class Course(Base):
     __tablename__ = "course"
     id = Column(INTEGER, primary_key=True)  # 编号

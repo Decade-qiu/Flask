@@ -1,4 +1,5 @@
 import datetime
+from blueprints.anadata import bp as data
 from blueprints.conn import bp as conn
 from blueprints.discuss import bp as discuss
 from blueprints.sockjs import CCHandler, ChatRoomHandler,CanvasConnection as BoardHandler, AudioHandler, CommentHandler, checkHandler
@@ -42,7 +43,7 @@ app.debug=True
 blueprint_list = [
     main, regist, login, userprofile, logout, upload, playchat,
     build, myStream, stream, msg, index, course, dm, test, service,
-    hhelp, screen, renmark, conn, discuss
+    hhelp, screen, renmark, conn, discuss, data
 ]
 for cur_bp in blueprint_list:
     app.register_blueprint(cur_bp)

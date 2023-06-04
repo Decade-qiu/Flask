@@ -112,3 +112,48 @@ def is_micOff():
     return dict(
             code=f
         )
+
+@bp.route("/message/", methods=['POST'])
+def is_message():
+    name = session.get('name')
+    connect = ORM.db()
+    cnt = 0
+    try:
+        mss = connect.query(Message).filter(Message.name==name).order_by(Message.created.desc()).all()
+        for ms in mss:
+            if ms.isr == 1:
+                cnt += 1
+    except Exception as e:
+        connect.rollback()
+    else:
+        connect.commit()
+    finally:
+        connect.close()
+    return dict(
+            count=cnt
+        )
+
+@bp.route("/clear/", methods=['GET'])
+def ck_message():
+    name = session.get('name')
+    connect = ORM.db()
+    data = {'title': '消息'}
+    f = 0
+    res = []
+    try:
+        mss = connect.query(Message).filter(Message.name==name).order_by(Message.created.desc()).all()
+        for ms in mss:
+            tp = ms.isr
+            res.append([ms.title, ms.created, '1' if tp==1 else ''])
+            if ms.isr == 1:
+                ms.isr = 0
+    except Exception as e:
+        connect.rollback()
+        f = 0
+    else:
+        connect.commit()
+    finally:
+        connect.close()
+    data['mess'] = res
+    print(res)
+    return render_template("ckmessage.html", data=data)

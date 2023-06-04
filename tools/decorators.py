@@ -6,7 +6,6 @@ def is_login(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         name = session.get('name', '')
-        print(name)
         if name:
             return func(*args, *kwargs)
         else:

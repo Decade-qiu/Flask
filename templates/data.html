@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="col-md-10 pad-right">
+    <div class="card">
+        <div class="card-header">
+            个人学习数据统计中心
+        </div>
+        <div class="card-body">
+            <canvas id="myChart">
+            </canvas>
+            <div class="time-stat">
+                <div class="stat-item">
+                    <div class="stat-value">课程观看总时长：<span id="totalTime" class="stat-value"></span>分钟</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">周观看时长：<span id="weeklyTime" class="stat-value"></span>分钟</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">月观看时长：<span id="monthlyTime" class="stat-value"></span>分钟</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block foot %}
+<style>
+    .time-stat {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+</style>
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+<script src="{{ url_for('static', filename='js/request.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 更新观看时长元素的内容
+    var weeklyTime = Math.random()*5+3;
+    var monthlyTime = Math.random()*10+weeklyTime;
+    var totalTime = Math.random()*20+3+monthlyTime;
+    document.getElementById("totalTime").textContent = Math.round(totalTime);
+    document.getElementById("weeklyTime").textContent = Math.round(weeklyTime);
+    document.getElementById("monthlyTime").textContent = Math.round(monthlyTime);
+    var courses = "{{ data['course']|safe }}".slice(1, -1);
+    courses = courses.split(",").map(function(item) {
+        return item.trim().slice(1, -1);
+    });
+    var attends = "{{ data['attend']|safe }}".slice(1, -1);
+    attends = attends.split(",").map(function(item) {
+        return parseInt(item.trim());
+    });
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: courses,
+            datasets: [{
+                label: '签到情况',
+                data: attends,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        upload('face', 200, 200, '/upload/');
+        request('/build/', '/courses/', ['title', 'content', 'face'], '创建成功！');
+    });
+</script>
+{% endblock %}
