@@ -20,6 +20,7 @@ class Msg(Base):
     streamId = Column(INTEGER)
     createdAt = Column(DATETIME, nullable=False)  # 创建时间
     updatedAt = Column(DATETIME, nullable=False)  # 修改时间
+    streamid = Column(BIGINT)  # 编号
 class Stream(Base):
     __tablename__ = "stream"
     id = Column(INTEGER, primary_key=True)  # 编号
@@ -464,7 +465,7 @@ class OBS(QWidget):
     def read_from_database(self):
         # 从数据库读取聊天记录
         session = ORM.db()
-        chat_records = session.query(Msg).all()
+        chat_records = session.query(Msg).filter(Msg.streamid == self.streamid).order_by(Msg.createdAt.asc()).limit(100).all()
         # 将聊天记录显示到聊天区
         session.close()
         self.chat_edit.clear()

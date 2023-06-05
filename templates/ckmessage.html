@@ -13,7 +13,7 @@
                 {% for val in v %}
                 <li class="list-group-item">
                     <div class="form-group">
-                        <div class="row">
+                        <div class="row mrow" uname="{{ val[0] }}" uid = "{{ val[3] }}">
                             <div class="col-md-4">
                                 {{ val[0] }} 开播拉！速去上课！
                             </div>
@@ -53,21 +53,10 @@
 <script src="{{ url_for('static', filename='js/request.js') }}"></script>
 <script>
     $(document).ready(function () {
-        $(".stream").click(function(){
-            var locurl = $(this).attr('urlId');
-            var locstream = $(this).attr('streamId');
-            $.ajax({
-                url: "/stream/",
-                data: {url : locurl},
-                dataType: "json",
-                type: "POST",
-                success: function (res) {
-                    location.href = "/stream/?"+"app=myapp"+"&"+"name="+res['name']+"&id="+locstream;
-                },
-                error: function (res) {
-                    console.log(res);
-                }
-            });
+        $(".mrow").click(function(){
+            var locurl = $(this).attr('uid');
+            var locstream = $(this).attr('uname');
+            location.href = "/stream/?"+"app=undefined"+"&"+"name="+locstream+"&"+"id="+locurl;
         });
     });
 </script>

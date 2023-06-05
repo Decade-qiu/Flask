@@ -1,14 +1,56 @@
-<!-- 嵌套 rtc_publisher.html 网页的 iframe -->
-<iframe id="player-iframe" src="http://localhost:8080/players/rtc_publisher.html" ></iframe>
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<!-- 新 Bootstrap4 核心 CSS 文件 -->
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+<!-- bootstrap.bundle.min.js 用于弹窗、提示、下拉菜单，包含了 popper.min.js -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+<!-- 最新的 Bootstrap4 核心 JavaScript 文件 -->
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='bw/dist/sketchy/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/theme/monokai.min.css" />
+<script type="text/javascript" src="/static/js/jswebrtc.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static',filename='dplayer/DPlayer.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCoreDefault.css') }}">
+<script src="{{ url_for('static',filename='ue/third-party/SyntaxHighlighter/shCore.js') }}"></script>
+<script src="{{ url_for('static',filename='dplayer/DPlayer.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/ueditor.all.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static',filename='ue/lang/zh-cn/zh-cn.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdn.bootcss.com/flv.js/1.4.0/flv.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+<script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+<script id="bfwone" type="text/javascript" src="http://repo.bfw.wiki/bfwrepo/js/bfwone.js"></script>
 
-<!-- 用于触发推流按钮点击事件的按钮 -->
-<button onclick="startPublish()">开始推流</button>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
 
+<body>
+    <div class="jswebrtc" data-url="webrtc://localhost/live/livestream"></div>
+</body>
+
+</html>
 <script>
-function startPublish() {
-    const playerIframe = document.getElementById('player-iframe');
-    // const btnPublish = playerIframe.contentWindow.document.getElementById('btn_publish');
-    // btnPublish.click();
-    document.getElementById('iframe').contentWindow.postMessage("aaaaaa",'*')
-}
+    var transports = ["websocket"];
+    conn = new SockJS('http://127.0.0.1:8000/audio?streamid=' + "{{ data['streamid'] }}", transports);
+    conn.onopen = function () {
+        console.log("音频服务器连接！");
+    };
+    conn.onmessage = function (event) {
+        console.log(event.data);
+        // openWindow();
+        $('.jswebrtc').attr('data-url', event.data);
+        
+    };
 </script>

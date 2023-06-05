@@ -4,7 +4,7 @@
 <div class="col-md-10 pad-right">
     <div class="card">
         <div class="card-header">
-            个人资料
+            投诉
         </div>
         <div class="card-body">
             {% set u = data['user'] %}
@@ -12,10 +12,10 @@
                 <div class="form-group">
                     <label>被投诉人昵称</label>
                     <input class="form-control"
-                           name="phone"
+                           name="name"
                            placeholder="请输入被投诉人昵称！"
                            type="text">
-                    <p class="text-danger" id="error_phone"></p>
+                    <p class="text-danger" id="error_name"></p>
                 </div>
                 <div class="form-group">
                     <label>投诉类型</label>
@@ -81,8 +81,10 @@
 <script src="{{ url_for('static', filename='js/request.js') }}"></script>
 <script>
     $(document).ready(function () {
-        upload('face', 200, 200, '/upload/');
-        request('/userprofile/', '/logout/', ['name', 'email', 'phone', 'sex', 'xingzuo', 'info', 'face', 'role'], '修改成功！');
+        $("#btn-sub").click(function () {
+            alert("投诉成功！");
+            location.reload();
+        });
     });
 </script>
 {% endblock %}

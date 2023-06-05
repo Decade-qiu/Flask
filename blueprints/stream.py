@@ -33,3 +33,13 @@ def stream():
             name=name
         )
         return res
+
+@bp.route("/ss/", methods=['GET'])
+def ss():
+    data = dict(
+        title="Stream"
+    )
+    streamid = request.args.get('id', '')
+    data['streamid'] = streamid
+    return render_template("temp.html", data=data)
+

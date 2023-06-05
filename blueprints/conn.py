@@ -144,7 +144,7 @@ def ck_message():
         mss = connect.query(Message).filter(Message.name==name).order_by(Message.created.desc()).all()
         for ms in mss:
             tp = ms.isr
-            res.append([ms.title, ms.created, '1' if tp==1 else ''])
+            res.append([ms.title, ms.created, '1' if tp==1 else '', ms.key])
             if ms.isr == 1:
                 ms.isr = 0
     except Exception as e:
@@ -155,5 +155,4 @@ def ck_message():
     finally:
         connect.close()
     data['mess'] = res
-    print(res)
     return render_template("ckmessage.html", data=data)

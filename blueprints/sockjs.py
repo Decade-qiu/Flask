@@ -49,11 +49,11 @@ class AudioHandler(SockJSConnection):
         room = int(info.arguments.get('streamid', '')[0], 10)
         if room not in self.dic:
             self.dic[room] = set()
-        print(room)
         self.dic[room].add(self)
+        print(room, self.dic[room])
 
     def on_message(self, message):
-        print(type(message), message)
+        # print(type(message), message)
         data = json.loads(message)
         uid = data['sid']
         url = data['url']

@@ -215,25 +215,25 @@
             }
         });
     });
-    var transports = ["websocket"];
-    conn = new SockJS('http://127.0.0.1:8000/audio?streamid='+$("#input_id").val(), transports);
-    conn.onopen = function () {
-        console.log("音频服务器连接！");
-    };
-    conn.onmessage = function (event) {
-        console.log(event.data);
-        // openWindow();
-        var card = document.querySelector('.rtc');
-        card.style.display = 'block';
-        $('.jswebrtc').attr('data-url', event.data);
-        card.querySelectorAll('video').forEach(video => {
-            video.style.height = '140px';
-            video.autoplay = true;
-            video.muted = true;
-            video.play();
-            video.muted = false;
-        });
-    };
+        var transports = ["websocket"];
+        conn = new SockJS('http://127.0.0.1:8000/audio?streamid='+$("#input_id").val(), transports);
+        conn.onopen = function () {
+            console.log("音频服务器连接！");
+        };
+        conn.onmessage = function (event) {
+            console.log(event.data);
+            // openWindow();
+            var card = document.querySelector('.rtc');
+            card.style.display = 'block';
+            $('.jswebrtc').attr('data-url', event.data);
+            card.querySelectorAll('video').forEach(video => {
+                video.style.height = '140px';
+                video.autoplay = true;
+                video.muted = true;
+                video.play();
+                video.muted = false;
+            });
+        };
     var isMic = 0;
     setInterval(function() {
         $.ajax({
@@ -248,9 +248,13 @@
                     if (isMic == 0){
                         alert("教师邀请你开麦！");
                         isMic = 1;
+                        console.log("开始录音");
                         const code = "document.getElementById('btn_publish').click();";
                         document.getElementById('iframe').contentWindow.postMessage(code, '*');
-                        conn.send("webrtc://localhost/live/livestream");
+                        var message = {url: 'webrtc://localhost/live/livestream', sid: $('#input_id').val()};
+                        setInterval(function() {
+                            conn.send(JSON.stringify(message));
+                        }, 1000);
                     }
                 }else{
                     if (isMic == 1){
@@ -280,7 +284,9 @@
                     const code = "document.getElementById('btn_publish').click();";
                     document.getElementById('iframe').contentWindow.postMessage(code, '*');
                     var message = {url: 'webrtc://localhost/live/livestream', sid: $('#input_id').val()};
-                    conn.send(JSON.stringify(message));
+                    setInterval(function() {
+                        conn.send(JSON.stringify(message));
+                    }, 1000);
                 }
             }
         });
