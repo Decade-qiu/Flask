@@ -1,10 +1,6 @@
 # Online Live Teaching Platform
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)  
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)  
-[![Flask](https://img.shields.io/badge/flask-2.0%2B-green)](https://flask.palletsprojects.com/)  
-[![Vue.js](https://img.shields.io/badge/vue.js-3.0%2B-green)](https://vuejs.org/)  
-[![PyQt5](https://img.shields.io/badge/pyqt5-5.15%2B-green)](https://www.riverbankcomputing.com/software/pyqt/)  
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)  [![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)  [![Flask](https://img.shields.io/badge/flask-2.0%2B-green)](https://flask.palletsprojects.com/)  [![Vue.js](https://img.shields.io/badge/vue.js-3.0%2B-green)](https://vuejs.org/)  [![PyQt5](https://img.shields.io/badge/pyqt5-5.15%2B-green)](https://www.riverbankcomputing.com/software/pyqt/)  
 
 Online Live Teaching Platform is a comprehensive educational software designed to facilitate online teaching and learning. Built with Flask, Vue.js, and PyQt5, this platform enables live streaming, interactive features, course management, and community discussions for teachers, students, administrators, and regulators.
 
