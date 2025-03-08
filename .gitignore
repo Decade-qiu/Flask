@@ -1,0 +1,115 @@
+# .gitignore for Online Live Teaching Platform
+
+# Python-related ignores
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyd
+*.pyo
+.Python
+env/
+venv/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+sdist/
+var/
+*.egg
+MANIFEST
+*.manifest
+*.spec
+
+# Flask-specific ignores
+instance/
+*.sqlite
+config.py  # If sensitive configurations are stored here, exclude it
+
+# Frontend (Vue.js) ignores
+node_modules/
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# PyQt5-related ignores
+*.ui  # Generated UI files (if not versioned)
+*.pyc  # Compiled Python files
+
+# IDE-specific ignores
+.idea/              # PyCharm
+*.vscode/           # VS Code
+*.sublime-project
+*.sublime-workspace
+
+# macOS-specific ignores
+.DS_Store
+
+# Windows-specific ignores
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Build and deployment ignores
+build/
+target/
+*.apk
+*.ap_
+*.dex
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite3
+db.sqlite3
+
+# Virtual environment
+.python-version
+
+# Sensitive files
+.env
+*.pem
+*.key
+*.crt
+*.cer
+*.jks
+
+# Test-related ignores
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+
+# Editor backups
+*~
+*.swp
+
+# System files
+*.bak
+*.tmp
+
+# Ignore specific project files (customize as needed)
+migrations/versions/*.pyc  # Compiled migration files
+static/uploads/           # User-uploaded files (if stored locally)
+OBS/*                     # Object storage files (if sensitive)
+
+# Git-specific ignores
+.git
+.gitmodules
+
+# Custom ignore for test outputs or temporary files
+Test/__pycache__/
+tools/__pycache__/
+ui/__pycache__/
+
+# Large binary files or media (if not versioned)
+*.mp4
+*.flv
+*.avi
+*.mov
